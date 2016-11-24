@@ -13,18 +13,16 @@ def OrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N): #Note at the moment N<=6, els
         C = CollisionData[0, 0]
 
     #calculating the number of orbits in each generation
-    n = np.zeros((2, N+1))#, dtype=int)  # number in row, total number     CHANGED
+    n = np.zeros((2, N+1), dtype=int)  # number in row, total number     CHANGED
     n[0, 0] = 2
     n[0, 1] = 1
     n[0, 2] = 2
     n[1, 0] = 2
     n[1, 1] = 3
     n[1, 2] = 5
-    i = 3
     for i in range(3, N+1):
-        n[0, i] = n[0, i - 1] * n[1, i - 2]
+        n[0, i] = n[0, i - 1] * n[1, i - 2]+((n[0,i-1]*(n[0,i-1]-1))/2)
         n[1, i] = n[1, i - 1] + n[0, i]
-        i += 1
     print('Total Number of Orbits'), print(n[1,N])
     #datasetup
     CascadeTable=np.zeros((N+1,int(n[0,N])+1,7)) #generations vertically, different orbits horizontally, with each orbits data stored in the third dimension
@@ -36,25 +34,32 @@ def OrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N): #Note at the moment N<=6, els
     CascadeTable[1,1,:]=[3,1,2,a3, e3, s3,m3] #Storing the first generation orbit
     Norbit=4  # orbit label number
     #Cascade Loop
-    i=2 # the first generation to be calculated in the loop is the second
+    # the first generation to be calculated in the loop is the second
     for i in range(2, N+1): #generation loop
-        k=1 #first parent position in line above
         j=1 #write position on line
-        for k in range(1,int(n[0,i-1])+1):  #first parent loop, from the line above
+        for k in range(1,int(n[0,i-1])+1):  #first parent loop, from the line above horizontal
             [a4,e4,s4,m4]=CascadeTable[i-1,k,3:7] #fixing the first parent from line above
             #the second parent loop
-            x=0 # x represents the generation of the second parent
-            for x in range(0,i-1): #stops before i! looping down vertically for second parent
-                y=1 #y reperesents the horizontal placement of the second parent
-                for y in range(1,int(n[0,x])+1): #loops through that row for the second parent
+            # x represents the generation of the second parent
+            for x in range(0,i-1): #stops before i-1! looping down vertically for second parent
+                #y reperesents the horizontal placement of the second parent
+                for y in range(1,int(n[0,x])+1): #loops horizontally through that row for the second parent
                     [a5,e5,s5,m5]=CascadeTable[x,y,3:7] #the orbit data of the second parent
                     [a3, e3, s3,m3] = NewOrbit(a4, e4, s4, a5, e5, s5, Mstar, m4, m5, C, R) #calculating the generated orbit
                     CascadeTable[i, j, :] = [Norbit, CascadeTable[i-1,k,0], CascadeTable[x,y,0], a3, e3, s3,m3]
                     j += 1 #moving the output along horizontally to write the next in the generation
                     Norbit += 1 #Labeling the orbit
-                    y +=1 #selecting the next second parent horizontally
-                x +=1 #selecting the next generation of parents
-            k += 1 #selecting the next first parent
+
+
+            for y in range(k+1,int(n[0,i-1])+1):
+                [a5, e5, s5, m5] = CascadeTable[i-1, y, 3:7]  # the orbit data of the second parent
+                #print([a5, e5, s5, m5])
+                [a3, e3, s3, m3] = NewOrbit(a4, e4, s4, a5, e5, s5, Mstar, m4, m5, C, R)  # calculating the generated orbit
+                CascadeTable[i, j, :] = [Norbit, CascadeTable[i - 1, k, 0], CascadeTable[i-1, y, 0], a3, e3, s3, m3]
+                j += 1  # moving the output along horizontally to write the next in the generation
+                Norbit += 1  # Labeling the orbit
+
+
     return CascadeTable #Output is the entire data table
 
 def Circularisation(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N): #function finds the most circular orbits of each generation

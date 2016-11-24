@@ -36,7 +36,7 @@ def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,c1,r1): #This function gives the new 
     A2=A(a2,e2,m2+Mstar)
     A3=(u3*m3)/(((u1*m1)/A1)+((u2*m2)/A2))
     alpha=(u3/((A3**2.)*r1)) -1
-    beta=((m1*rdot(a1,e1,c1-s1,m1))+(m2*rdot(a2,e2,c1-s2,m2)))/m3
+    beta=((m1*rdot(a1,e1,c1-s1,Mstar+m1))+(m2*rdot(a2,e2,c1-s2,Mstar+m2)))/m3  #RDOT IS WRONG!
     #Calculating the New Orbit
     e3=sqrt((alpha**2.)+((beta**2.)/(A3**2.)))
     if e3>=1: #Checking the new orbit is bound, giving an error if not

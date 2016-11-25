@@ -71,11 +71,11 @@ def MinimalCircularisationPolarGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
     F = np.linspace(0, 2 * pi, 100)
     plt.figure()
     #Plotting Parent Orbits
-    R = npr(a1, e1, F - s1)
-    plt.polar(F, R,label="Orbit1")
-    R = npr(a2, e2, F - s2)
-    plt.polar(F, R, label="Orbit2")
-    i=1
+   # R = npr(a1, e1, F - s1)
+    #plt.polar(F, R,label="Orbit1")
+    #R = npr(a2, e2, F - s2)
+    #plt.polar(F, R, label="Orbit2")
+
     for i in range(1,N+1):
         [a3,e3,s3]=MinGen[i,4:7]
         R = npr(a3, e3, F - s3)
@@ -97,5 +97,21 @@ def MinimalCircularisationEccentricityGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
     return
 
 
+def MinimalEccentricitySGraph(a1,e1,a2,e2,Mstar,m1,m2,N,Ns):
+    s1=0
+    Generation = np.linspace(0, N, N + 1)
+    plt.figure()
+    steps=(2*pi)/Ns
+    for s2 in range(1,Ns):
+        print('s2=',s2*steps)
+        MinGen = MinimalCircularisation(a1, e1, s1, a2, e2, steps*s2+0.01, Mstar, m1, m2, N)
+        plt.plot(Generation, MinGen[:, 5],label='s=%s'%(s2*steps+0.01))
 
-
+    plt.xlabel('Generation of Orbits')
+    plt.ylabel('Eccentricity of the most circular orbit')
+    plt.title('Minimal -Lowest Eccentricity of the Generation')
+    plt.legend()
+    plt.show()
+    return
+#MinimalEccentricitySGraph(2*au,0.99,2.1*au,0.993,1.2e30,2e10,2e10,10,10)
+MinimalCircularisationPolarGraph(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,20)

@@ -64,6 +64,6 @@ def methodtest(a1, e1, s1, a2, e2, s2, Mstar, m1, m2):
 
 #methodtest(2*au,0.2,0,2.1*au,0.993,2,1.2e30,2e10,2e10)
 Data=CascadeComponents(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,8)
-print(Data[:,:,0])
-mine=min((Data[:,:,0]))
+#print(Data[:,:,0])
+mine=np.min(Data[:,:,0])
 print (mine)

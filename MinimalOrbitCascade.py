@@ -114,4 +114,4 @@ def MinimalEccentricitySGraph(a1,e1,a2,e2,Mstar,m1,m2,N,Ns):
     plt.show()
     return
 #MinimalEccentricitySGraph(2*au,0.99,2.1*au,0.993,1.2e30,2e10,2e10,10,10)
-MinimalCircularisationPolarGraph(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,20)
+#MinimalCircularisationPolarGraph(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,20)

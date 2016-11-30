@@ -12,4 +12,4 @@ def n(N):
         n[0, i] = n[0, i - 1] * n[1, i - 2]+((n[0,i-1]*(n[0,i-1]-1))/2)
         n[1, i] = n[1, i - 1] + n[0, i]
     return n
-print(n(9))
+print(n(7))

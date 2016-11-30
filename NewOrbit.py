@@ -65,7 +65,7 @@ def CollisionGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
     [a3, e3, s3,m3]=NewOrbit(a1, e1, s1, a2, e2, s2,Mstar,m1, m2,CollisionData[0,0],CollisionData[1,0]) #loading the data on the new orbit
     if e3<1 : #Checking its a valid bound orbit
         R = npr(a3, e3, F - s3)
-        plt.polar(F, R, label="New Orbit1")
+        plt.polar(F, R, label="New Orbit 1")
     else: #else give an error
         print('Error: Orbit 3 Unbound!')
     #Plotting the Second New Orbit

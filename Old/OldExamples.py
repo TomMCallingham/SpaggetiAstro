@@ -1,6 +1,6 @@
-from NewOrbit import *
-from OrbitCascade import*
-from MinimalOrbitCascade import*
+from PerfectMerging.MinimalOrbitCascade import*
+from PerfectMerging.OrbitCascade import*
+
 
 def CollisionExample(): #Demonstration of the orbit collider generating orbits
     CollisionGraph(2*au,0.3,0,2.1*au,0.1,2,1.2e30,2e10,2e10)

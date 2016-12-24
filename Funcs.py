@@ -1,6 +1,6 @@
 from math import *
 import numpy as np
-G=6.67408e-11 #Graviational Constant
+G=2.982e-27  #now in au, before 6.67408e-11 #Graviational Constant
 def A(a, e, m):
     Acalc=sqrt((G*m)/(a*(1-(e**2.))))
     return Acalc

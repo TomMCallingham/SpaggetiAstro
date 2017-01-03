@@ -54,9 +54,9 @@ def EqualMinimalAsteroidLambdaEccentricity(N,Ns):
 
 
 #CollisionRadius() #Graph 1
-CollisionExample() #Graph 2
+#CollisionExample() #Graph 2
 #MinimalAsteroidCascadeOrbits(10) #Graph 3
-#MinimalAsteroidLambdaEccentricity(15,10) #Graph 4
+MinimalAsteroidLambdaEccentricity(15,10) #Graph 4
 
 
 #MinimalAsteroidCascadeEccentricity(20) #Graph ?

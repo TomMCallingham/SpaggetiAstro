@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 G = 2.982e-27
 au= 1 #now in au units149597871e3
 
-def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse
+def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse, note c2<c1
     #function will give an error if L=0,e2=0
     #Calculating Constants used in the method
     L=s1-s2
@@ -25,7 +25,6 @@ def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points
     #Output is the two collision points in angle and radius in an array
     CollisionData=np.array([[c1,c2],[r1,r2]])
     return CollisionData
-
 def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,c1,r1): #This function gives the new orbit created, given two orbits and there crossing points
     m3=m1+m2   #for now assuming its perfectly merging
     #Calculating Constants

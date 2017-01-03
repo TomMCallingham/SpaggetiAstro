@@ -5,12 +5,16 @@ import numpy as np
 def MinimalOrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N): #Note at the moment N<=6, else the array is too large
     CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)
     #for now, just selecting closest collision point
-    if CollisionData[1,0]>CollisionData[1,1]:
+    if CollisionData[1,0]>CollisionData[1,1]:   #changed to choose b
         R=CollisionData[1,1]
         C=CollisionData[0,1]
     else:
         R = CollisionData[1, 0]
         C = CollisionData[0, 0]
+
+    #selecting b
+    R = CollisionData[1, 1]
+    C = CollisionData[0, 1]
 
     #calculating the number of orbits in each generation
     n = np.zeros((2, N+1), dtype=int)  # number in row, total number     CHANGED

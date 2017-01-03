@@ -3,8 +3,8 @@ from math import *
 from Funcs import *
 from NewOrbit import *
 
-au= 149597871e3
-G = 6.67408e-11
+au= 1#149597871e3
+G = 2.982e-27#6.67408e-11
 #big data table of N1 and N2 values, storing eccentriciy
 def newmom(dot1,dot2,m1,m2,N1,N2):
     T=((N1*m1*dot1)+(N2*m2*dot2))/((N1*m1)+(N2*m2))
@@ -24,11 +24,11 @@ def CascadeComponents(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
     thetab1dot = thetadot(a1, e1, cb - s1, m1+Mstar)
     rb2dot = rdot(a2, e2, cb - s2, m2+Mstar)
     thetaa1dot = thetadot(a2, e2, cb - s2, m2+Mstar)
-    print('Orbit_a'),print('1'), print(ra1dot), print(thetaa1dot), print('2'), print(ra2dot), print(thetaa2dot)
+    #print('Orbit_a'),print('1'), print(ra1dot), print(thetaa1dot), print('2'), print(ra2dot), print(thetaa2dot)
     #print('Orbit_b'), print(rb1dot), print(rb2dot)
 
     #a for now
-    aData=np.zeros((N+1,N+1,4))
+    aData=np.zeros((N+1,N+1,4)) #e,m,rdot,thetadot
     #default e
     aData[:,:,0]=99
     #ParentOrbit 1
@@ -63,7 +63,7 @@ def methodtest(a1, e1, s1, a2, e2, s2, Mstar, m1, m2):
 
 
 #methodtest(2*au,0.2,0,2.1*au,0.993,2,1.2e30,2e10,2e10)
-Data=CascadeComponents(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,8)
-#print(Data[:,:,0])
+Data=CascadeComponents(2*au,0.99,0,2.1*au,0.993,2,1.2e30,2e10,2e10,10)
+print(Data[:,:,0])
 mine=np.min(Data[:,:,0])
 print (mine)

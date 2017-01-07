@@ -2,7 +2,7 @@ from Funcs import *
 from math import *
 import matplotlib.pyplot as plt
 G = 2.982e-27#6.67408e-11
-au= 1#149597871e3
+au= 1# 149597871e3
 
 def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse
     #function will give an error if L=0,e2=0

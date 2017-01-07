@@ -1,5 +1,7 @@
-from NewOrbit import *
 import numpy as np
+
+from KCollisions.NewOrbit import *
+
 au= 149597871e3
 def RadialGraph(a1,e1,a2,e2):
     s1=0

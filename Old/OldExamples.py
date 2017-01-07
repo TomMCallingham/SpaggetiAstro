@@ -1,5 +1,5 @@
-from PerfectMerging.MinimalOrbitCascade import*
-from PerfectMerging.OrbitCascade import*
+from KCollisions.MinimalOrbitCascade import*
+from KCollisions.OrbitCascade import*
 
 
 def CollisionExample(): #Demonstration of the orbit collider generating orbits

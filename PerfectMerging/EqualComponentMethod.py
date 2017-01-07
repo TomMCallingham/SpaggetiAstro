@@ -1,7 +1,4 @@
-import numpy as np
-from math import *
-from Funcs import *
-from NewOrbit import *
+from KCollisions.NewOrbit import *
 
 au= 1#149597871e3
 G = 2.982e-27#6.67408e-11
@@ -9,10 +6,6 @@ G = 2.982e-27#6.67408e-11
 def newmom(dot1,dot2,m1,m2,N1,N2):
     T=((N1*m1*dot1)+(N2*m2*dot2))/((N1*m1)+(N2*m2))
     return T
-def newe(Rdot,Thetadot,R,m3,Mstar):
-    u=G*(Mstar+m3)
-    e=sqrt((((((R**3.)*(Thetadot**2.))/u)-1)**2.)+(((Rdot**2.)*(R**4)*(Thetadot**2))/(u**2.)))
-    return e
 def CascadeComponents(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
 
     [[ca, cb], [ra, rb]] = CollisionPoints(a1, e1, s1, a2, e2, s2)
@@ -46,7 +39,7 @@ def CascadeComponents(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
             aData[N1,N2,1]=N1*m1+N2*m2 #new m
             aData[N1,N2,2]=newmom(ra1dot,ra2dot,m1,m2,N1,N2) #new rdot
             aData[N1,N2,3]=newmom(thetaa1dot,thetaa2dot,m1,m2,N1,N2) #new thetadot
-            aData[N1,N2,0]=newe(aData[N1,N2,2],aData[N1,N2,3],ra,aData[N1,N2,1],Mstar) #new e
+            aData[N1,N2,0]=newe(aData[N1,N2,2],aData[N1,N2,3],ra,aData[N1,N2,1]+Mstar) #new e
     return aData
 
 def EccentricityGraph():
@@ -56,7 +49,7 @@ def methodtest(a1, e1, s1, a2, e2, s2, Mstar, m1, m2):
     [[ca, cb], [ra, rb]] = CollisionPoints(a1, e1, s1, a2, e2, s2)
     ra1dot = rdot(a1, e1, ca - s1, m1+Mstar)  # CHECK SIGN OF ANGLES
     thetaa1dot = thetadot(a1, e1, ca - s1, m1+Mstar)
-    e=newe(ra1dot,thetaa1dot,ra,m1,Mstar)
+    e=newe(ra1dot,thetaa1dot,ra,m1+Mstar)
     print(e)
     print('actual'),print(e1)
     return

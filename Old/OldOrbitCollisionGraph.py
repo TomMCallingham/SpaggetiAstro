@@ -1,8 +1,4 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from math import *
-from Funcs import *
-from NewOrbit import *
+from KCollisions.NewOrbit import *
 
 def EllipseCrossImpact(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
     F = np.linspace(0, 2 * pi, 100)

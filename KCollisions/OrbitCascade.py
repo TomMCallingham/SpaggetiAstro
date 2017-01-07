@@ -1,6 +1,8 @@
-from NewOrbit import *
 import matplotlib.pyplot as plt
 import numpy as np
+
+from KCollisions.NewOrbit import *
+
 
 def OrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N): #Note at the moment N<=6, else the array is too large
     CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)

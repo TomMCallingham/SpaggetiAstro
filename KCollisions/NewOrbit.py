@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 G = 2.982e-27
 au= 1 #now in au units149597871e3
 
-def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse, note c2<c1
+def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse,
     #function will give an error if L=0,e2=0
     #Calculating Constants used in the method
     L=s1-s2
@@ -25,8 +25,8 @@ def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points
     #Output is the two collision points in angle and radius in an array
     CollisionData=np.array([[c1,c2],[r1,r2]])
     return CollisionData
-def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,c1,r1): #This function gives the new orbit created, given two orbits and there crossing points
-    m3=m1+m2   #for now assuming its perfectly merging
+def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,c1,r1): #This function gives the new orbit created, given two orbits and there crossing points
+    m3=K*(m1+m2)   #for now assuming its perfectly merging
     #Calculating Constants
     u1=G*(m1+Mstar)
     u2=G*(m2+Mstar)
@@ -38,17 +38,17 @@ def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,c1,r1): #This function gives the new 
     beta=((m1*rdot(a1,e1,c1-s1,Mstar+m1))+(m2*rdot(a2,e2,c1-s2,Mstar+m2)))/m3  #RDOT IS WRONG!
     #Calculating the New Orbit
     e3=sqrt((alpha**2.)+((beta**2.)/(A3**2.)))
-    if e3>=1: #Checking the new orbit is bound, giving an error if not
-        print('ERROR: Unbound Orbit!')
+    #if e3>=1: #Checking the new orbit is bound, giving an error if not
+        #print('ERROR: Unbound Orbit!')
     a3=u3/((1-(e3**2.))*(A3**2.))
-    s3= acos(alpha/e3)  +c1
+    s3= -acos(alpha/e3)  +c1 #note changed
     if abs(sin(s3+c1)-beta/(A3*e3))>10e-10: #checking the degeneracy of arccos
         s3=2*pi-(s3-2*c1)
     #Outputting the NewOrbit Data
     NewOrbitData=np.array([a3,e3,s3,m3])
     return NewOrbitData
 
-def CollisionGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
+def CollisionGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K):
     #Setting up the Plotter
     F = np.linspace(0, 2 * pi, 100)
     plt.figure()
@@ -61,21 +61,21 @@ def CollisionGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
     #Plotting the first New Orbit
     CollisionData=CollisionPoints(a1,e1,s1,a2,e2,s2) #Loading the ellipse intersection points
     plt.scatter(CollisionData[0,:], CollisionData[1,:], c='r') #Highlighting the collision points
-    [a3, e3, s3,m3]=NewOrbit(a1, e1, s1, a2, e2, s2,Mstar,m1, m2,CollisionData[0,0],CollisionData[1,0]) #loading the data on the new orbit
+    [a3, e3, s3,m3]=NewOrbit(a1, e1, s1, a2, e2, s2,Mstar,m1, m2,K,CollisionData[0,0],CollisionData[1,0]) #loading the data on the new orbit
     if e3<1 : #Checking its a valid bound orbit
         R = npr(a3, e3, F - s3)
         plt.polar(F, R, label="New Orbit 1")
     else: #else give an error
         print('Error: Orbit 3 Unbound!')
     #Plotting the Second New Orbit
-    [a4, e4, s4,m4] = NewOrbit(a1, e1, s1, a2, e2, s2, Mstar, m1, m2, CollisionData[0,1], CollisionData[1, 1])
+    [a4, e4, s4,m4] = NewOrbit(a1, e1, s1, a2, e2, s2, Mstar, m1, m2,K, CollisionData[0,1], CollisionData[1, 1])
     if e4 < 1:
         R = npr(a4, e4, F - s4)
         plt.polar(F, R, label="New Orbit 2")
     else:
         print('Error: Orbit 4 Unbound!')
     plt.legend() #attaching a legend to the graph
-    plt.title('Graphing the Bound Orbits')
+    plt.title('Graphing the Bound Orbits with K=%s'%K)
     plt.show()
     return
 

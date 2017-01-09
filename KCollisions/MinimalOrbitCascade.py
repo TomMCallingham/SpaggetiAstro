@@ -4,19 +4,14 @@ import numpy as np
 from KCollisions.NewOrbit import *
 
 
-def MinimalOrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #Note at the moment N<=6, else the array is too large
+def MinimalOrbitCascade(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #Note at the moment N<=6, else the array is too large
     CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)
-    #for now, just selecting closest collision point
-    if CollisionData[1,0]>CollisionData[1,1]:
-        R=CollisionData[1,1]
-        C=CollisionData[0,1]
-    else:
-        R = CollisionData[1, 0]
-        C = CollisionData[0, 0]
-
-    #selecting a
-   # R = CollisionData[1, 0]
-    #C = CollisionData[0, 0]
+    if x=='a':
+        R=CollisionData[1,0]
+        C=CollisionData[0,0]
+    elif x=='b':
+        R = CollisionData[1, 1]
+        C = CollisionData[0, 1]
 
     #calculating the number of orbits in each generation
     n = np.zeros((2, N+1), dtype=int)  # number in row, total number     CHANGED
@@ -60,12 +55,12 @@ def MinimalOrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #Note at the moment 
 
 
 
-                #Norbit += 1  # Labeling the orbit
+
 
     return CascadeTable  # Output is the entire data table
 
-def MinimalCircularisation(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #function finds the most circular orbits of each generation
-    CascadeTable=MinimalOrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N) #creating and loading the data table
+def MinimalCircularisation(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #function finds the most circular orbits of each generation
+    CascadeTable=MinimalOrbitCascade(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N) #creating and loading the data table
     MinGen=np.zeros((N+1,8))
     for i in range(0,N+1): #for every generation, find the orbit with the min eccentricity and store the data, including the horizontal index for future reference
         MinIndex=CascadeTable[i,:,4].argmin()
@@ -75,8 +70,8 @@ def MinimalCircularisation(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #function finds t
 
 
 
-def MinimalCircularisationPolarGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
-    MinGen=MinimalCircularisation(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N)
+def MinimalCircularisationPolarGraph(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
+    MinGen=MinimalCircularisation(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N)
     F = np.linspace(0, 2 * pi, 100)
     plt.figure()
     #Plotting Parent Orbits
@@ -94,8 +89,8 @@ def MinimalCircularisationPolarGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
     plt.show()
     return
 
-def MinimalCircularisationEccentricityGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
-    MinGen=MinimalCircularisation(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N)
+def MinimalCircularisationEccentricityGraph(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
+    MinGen=MinimalCircularisation(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N)
     Generation = np.linspace(0, N, N+1)
     plt.figure()
     plt.plot(Generation,MinGen[:,5])
@@ -106,19 +101,19 @@ def MinimalCircularisationEccentricityGraph(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N):
     return
 
 
-def MinimalEccentricitySGraph(a1,e1,a2,e2,Mstar,m1,m2,K,N,Ns):
+def MinimalEccentricitySGraph(x,a1,e1,a2,e2,Mstar,m1,m2,K,N,Ns):
     s1=0
     Generation = np.linspace(0, N, N + 1)
     plt.figure()
     steps=(2*pi)/Ns
     for s2 in range(1,Ns):
-        #print('s2=',s2*steps)
-        MinGen = MinimalCircularisation(a1, e1, s1, a2, e2, np.around((steps*s2+0.01), decimals=2), Mstar, m1, m2,K, N)
-        plt.plot(Generation, MinGen[:, 5],label='Lambda/pi=%s'%(np.around((steps*s2+0.01)/pi, decimals=2)))
+
+        MinGen = MinimalCircularisation(x,a1, e1, s1, a2, e2, np.around((steps*s2+0.001), decimals=2), Mstar, m1, m2,K, N)
+        plt.plot(Generation, MinGen[:, 5],label='Lambda/pi=%s'%(np.around((steps*s2+0.001)/pi, decimals=2)))
 
     plt.xlabel('Generation of Orbits')
-    plt.ylabel('Eccentricity of the most circular orbit')
-    plt.title('Minimal -Lowest Eccentricity of the Generation with K=%s'%K)
+    plt.ylabel('e of the most circular orbit')
+    plt.title('Lowest e of the Generation with K=%s, collision %s'%(K,x))
     plt.legend()
     plt.xlim([0,N])
     plt.show()

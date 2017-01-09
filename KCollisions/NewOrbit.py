@@ -42,8 +42,10 @@ def NewOrbit(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,c1,r1): #This function gives the ne
         #print('ERROR: Unbound Orbit!')
     a3=u3/((1-(e3**2.))*(A3**2.))
     s3= -acos(alpha/e3)  +c1 #note changed
-    if abs(sin(s3+c1)-beta/(A3*e3))>10e-10: #checking the degeneracy of arccos
+    if abs(sin(c1-s3)-beta/(A3*e3))>10e-10: #checking the degeneracy of arccos
         s3=2*pi-(s3-2*c1)
+    if abs(sin(c1-s3)-beta/(A3*e3))>10e-10: #checking the degeneracy of arccos
+        print('Error in new orbit')
     #Outputting the NewOrbit Data
     NewOrbitData=np.array([a3,e3,s3,m3])
     return NewOrbitData

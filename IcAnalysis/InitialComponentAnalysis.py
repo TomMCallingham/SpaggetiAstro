@@ -23,7 +23,7 @@ def ICLBeste(a1,e1,a2,e2,Mstar):
     R= np.zeros((2,N))  #radial collision points
     C = np.zeros((2, N))   #theta collision points
 
-    for i in range(1,N):
+    for i in range(0,N):
         [[C[0,i], C[1,i]], [R[0,i], R[1,i]]] = CollisionPoints(a1, e1, 0, a2, e2, L[i])
 
     ThetaKepler=np.sqrt((G*Mstar)/(np.power((R[:,:]),3)))

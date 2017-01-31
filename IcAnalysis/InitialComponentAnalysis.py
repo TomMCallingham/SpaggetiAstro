@@ -83,4 +83,56 @@ def ICLBestePlot(a1, e1, a2, e2, Mstar): #note masses make no difference
 
 #InitialComponents(2*au,0.99,2.1*au,0.993,1.2e30,2e10,2e10,10000)
 
-ICLBestePlot(2*au,0.99,2.1*au,0.993,1.2e30)
+#ICLBestePlot(2*au,0.99,2.1*au,0.993,1.2e30)
+
+
+def ICLVelocities(a1,e1,a2,e2,Mstar):
+    N=1000 # Choosing resolution badd word ah well
+    L = np.linspace(0, 2 * pi, N)   #NOTE CHECK L def!! + or -
+    R= np.zeros((2,N))  #radial collision points
+    C = np.zeros((2, N))   #theta collision points
+
+    for i in range(1,N):
+        [[C[0,i], C[1,i]], [R[0,i], R[1,i]]] = CollisionPoints(a1, e1, 0, a2, e2, L[i])
+
+    #ThetaKepler=np.sqrt((G*Mstar)/(np.power((R[:,:]),3)))
+    Rdot1=rdot(a1,e1,C[:,:],Mstar) #another (2,N) array. Note taken out masses, no differnece!
+    Thetadot1=thetadot(a1,e1,C[:,:],Mstar)
+    RThetadot1=R*Thetadot1
+   # ThetadotK1=Thetadot1-ThetaKepler
+    Rdot2 = rdot(a2, e2, C[:, :]-L,  Mstar)
+    Thetadot2=thetadot(a2, e2, C[:, :]-L,  Mstar)
+    RThetadot2 = R * Thetadot2
+   # ThetadotK2 = Thetadot2-ThetaKepler
+
+    plt.figure()
+    plt.subplot(211)
+    plt.plot(L/(pi),abs(Rdot1[0,:]), label='rd1 at a')
+    plt.plot(L/(pi),RThetadot1[0,:],label='rtd1 at a')
+    plt.plot(L/(pi), abs(Rdot2[0, :]), label='rd2 at a')
+    plt.plot(L / ( pi), RThetadot2[0, :], label='rtd2 at a')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(L / ( pi), abs(Rdot1[1, :]), label='rd1 at b')
+    plt.plot(L / ( pi), RThetadot1[1, :], label='rtd1 at b')
+    plt.plot(L / ( pi), abs(Rdot2[1, :]), label='rd2 at b')
+    plt.plot(L / (pi), RThetadot2[1, :], label='rtd2 at b')
+    plt.legend()
+
+    plt.figure()
+    angle1=np.arctan(Rdot1/RThetadot1)
+    angle2 = np.arctan(Rdot2 / RThetadot2)
+    plt.subplot(211)
+    plt.plot(L/pi,abs(angle1[0,:]/pi),label='angle 1 at a')
+    plt.plot(L / pi, abs(angle2[0, :]/pi), label='angle 2 at a')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(L / pi, abs(angle1[1, :]/pi), label='angle 1 at b')
+    plt.plot(L / pi, abs(angle2[1, :]/pi), label='angle 2 at b')
+    plt.legend()
+    plt.show()
+
+
+    return
+
+ICLVelocities(2*au,0.99,2.1*au,0.993,1.2e30)

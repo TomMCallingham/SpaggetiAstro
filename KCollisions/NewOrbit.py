@@ -1,8 +1,8 @@
 from Funcs import *
 from math import *
 import matplotlib.pyplot as plt
-G = 2.982e-27
-au= 1 #now in au units149597871e3
+G =6.674e-11# 2.982e-27
+au= 1.496e8
 
 def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points of two given ellipse,
     #function will give an error if L=0,e2=0

@@ -1,7 +1,7 @@
 from math import *
 import numpy as np
-G=2.982e-27  #now in au, before 6.67408e-11 #Graviational Constant
-
+G =6.674e-11# 2.982e-27
+au= 1.496e11
 
 def rdot(a,e,f,m):
     return np.sqrt((G*m)/(a*(1-(e**2))))*e*np.sin(f)

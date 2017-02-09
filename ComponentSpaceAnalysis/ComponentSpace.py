@@ -5,8 +5,8 @@ import numpy as np
 from KCollisions.NewOrbit import *
 from KCollisions.MinimalOrbitCascade import *
 from ComponentSpaceAnalysis.EccentricitySolver import *
-G = 2.982e-27
-
+G =6.674e-11# 2.982e-27
+au= 1.496e11
 def erdot(e,R,Thetadot,Mstar): #gives an rdot from r, positive only
     u=G*Mstar
     Rdot=(u/((R**2.)*abs(Thetadot)))*np.sqrt((e**2.)-(((((R**3.)*(Thetadot**2.))/u)-1)**2.))
@@ -45,7 +45,7 @@ def eGraph(R,Mstar):
 
 
 def ComGraph(x,a1,e1,s1,a2,e2,s2,Mstar,m1,m2,N):
-    K=0.9
+    K=1
     Mstar=1.2e30
     CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)
     if x == 'a':
@@ -125,8 +125,8 @@ def MineComGraph(x,a1,e1,s1,a2,e2,s2,Mstar):
 
 
 
-ComGraph('a',2,0.99,0,2.1,0.993,1.8,1.2e30,2e10,2e10,10)
-#MineComGraph('a',2*au,0.99,0,2.1*au,0.993,1,1.2e30)
+#ComGraph('a',2*au,0.99,0,2.1*au,0.993,1.8,1.2e30,2e10,2e10,10)
+MineComGraph('a',2*au,0.99,0,2.1*au,0.993,1.5,1.2e30)
 
 #erdotdefdata(0.2,1,1.2e30, 10)
 #eGraph(1,1.2e30)

@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from KCollisions.NewOrbit import *
 from Funcs import *
+G =6.674e-11# 2.982e-27
+au= 1.496e11
 def eSolver(rd1,td1,rd2,td2,tdk,R):
     Mstar=1.2e30
     #Remove R dimensions from r

@@ -70,7 +70,7 @@ def LambdaeGraph(a1,e1,a2,e2):
 
     return
 
-#LambdaeGraph(2,0.99,2,0.993)
+#LambdaeGraph(2*au,0.99,2*au,0.993)
 
 
 

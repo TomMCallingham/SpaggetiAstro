@@ -117,7 +117,7 @@ def MineComGraph(x,a1,e1,s1,a2,e2,s2,Mstar):
     plt.title('CollisionPoint %s, emin=%s' %(x,emin))
     plt.legend()
     plt.xlabel('Rdot')
-    plt.ylabel('Theta Dot')
+    plt.ylabel('R*Theta Dot')
     plt.show()
     return
 
@@ -125,7 +125,7 @@ def MineComGraph(x,a1,e1,s1,a2,e2,s2,Mstar):
 
 
 
-#ComGraph('a',2*au,0.99,0,2.1*au,0.993,1.8,1.2e30,2e10,2e10,10)
+#ComGraph('b',2*au,0.99,0,2.1*au,0.993,1.8,1.2e30,2e10,2e10,8)
 MineComGraph('a',2*au,0.99,0,2.1*au,0.993,1.5,1.2e30)
 
 #erdotdefdata(0.2,1,1.2e30, 10)

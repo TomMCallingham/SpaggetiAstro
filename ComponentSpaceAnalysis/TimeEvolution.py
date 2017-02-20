@@ -12,9 +12,7 @@ import re
 Mstar = 1.2e30
 au = 1.496e11
 year = 3.154e+7
-#Setting up collisions!
-
-
+#Setup
 x='a'
 a1=2*au
 e1=0.99
@@ -22,12 +20,16 @@ s1=0
 a2=2.1*au
 e2=0.993
 s2=2
-dfSize = 1  # 1/(1.496e11) #1 meter
-Rbeam = 1000 * dfSize
+dfSize = 1  #1 meter
 
+#Rbeam = 2.6e3 #from paper veras
+#TotalMass=2.26e14
+Rbeam=1e3
+TotalMass=1e6
+
+
+#@jit
 def MomDataCalc( N):
-
-
     # CollisionPoints
     CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)
     if x == 'a':
@@ -40,74 +42,65 @@ def MomDataCalc( N):
     # setting up the parent data
     rd1 = rdot(a1, e1, C - s1, Mstar)
     td1 = thetadot(a1, e1, C - s1, Mstar)
-    V1 = np.array([[rd1], [R * td1]])
+    V1 = np.array([rd1, R * td1])
     v1 = nplg.norm(V1)
     rd2 = rdot(a2, e2, C - s2, Mstar)
     td2 = thetadot(a2, e2, C - s2, Mstar)
-    V2 = np.array([[rd2], [R * td2]])
+    V2 = np.array([rd2, R * td2])
     v2 = nplg.norm(V2)
     Vrel = V2 - V1
+    vrel=nplg.norm(Vrel)
 
     # Creating the TEmporary Momentum Data
     TempMomData = np.zeros((8, N))  # 0-rd,1-R*td,2-v,3-vrel1,4-vrel2,5-angle1,6-angle2,7-e,
     H = np.linspace(0, 1, N)
-    TempMomData[0:2, :] = V1 + H * Vrel  # rd,td
 
+
+    alpha1=abs(np.arccos(np.vdot(V1,Vrel)/(v1*vrel)))
+    alpha2 = abs(np.arccos(np.vdot(V2, Vrel) / (v2 * vrel)))
     # Finding The Collision Angles, skipping parents
+    TempMomData[3, :] = H * vrel  # vrel1
+    TempMomData[4, :] = (1 - H) * vrel  # vrel2
     for i in range(0, N):
+        TempMomData[0:2, i] = V1 + H[i] * Vrel # rd,td
         TempMomData[2, i] = nplg.norm(TempMomData[0:2, i])  # v
-        TempMomData[3, i] = nplg.norm(TempMomData[0:2, i] - V1)  # vrel1
-        TempMomData[4, i] = nplg.norm(TempMomData[0:2, i] - V2)  # vrel2
-        TempMomData[5, i] = np.arccos(np.vdot(TempMomData[0:2, i], V1) / (v1 * TempMomData[2, i]))  # angle 1
-        TempMomData[6, i] = np.arccos(np.vdot(TempMomData[0:2, i], V2) / (v2 * TempMomData[2, i]))  # angle2
+
     # e calc
-    TempMomData[7, :] = newe(TempMomData[0, :], TempMomData[1, :] / R, R, Mstar)  # eccentricity
     # Rcol
     RcolParents = np.zeros((2, N))
-    MomentaCol = np.zeros((2, N))  # orbit dependand part, 1 for each parent
     PConstant = (3 * ((G * Mstar) ** 4.) * pi) / (256 * Rbeam * (R ** 12.))
     ParentConstant = np.zeros((2))
-    ParentConstant[0] = 1 / (v1 * ((td1 ** 3.)))  # parent1 constant
-    ParentConstant[1] = 1 / (v2 * ((td2 ** 3.)))  # parent1 constant
-    # Note parents cannot collide with themselvels
-    MomentaCol[0, 1:N] = (TempMomData[3, 1:N] / (
-    TempMomData[2, 1:N] * ((TempMomData[1, 1:N] / R) ** 3.) * abs(np.sin(TempMomData[5, 1:N]))))  # parent1
-    MomentaCol[1, 0:N - 1] = (TempMomData[4, 0:N - 1] / (
-    TempMomData[2, 0:N - 1] * ((TempMomData[1, 0:N - 1] / R) ** 3.) * abs(np.sin(TempMomData[6, 0:N - 1]))))  # paernt2
-    RcolParents[0, :] = PConstant * ParentConstant[0] * MomentaCol[0, :] * (dfSize ** 2.)
-    RcolParents[1, :] = PConstant * ParentConstant[1] * MomentaCol[1, :] * (dfSize ** 2.)
-
+    ParentConstant[0] = 1 / (sin(alpha1)*v1 * ((td1 ** 3.)))  # parent1 constant
+    ParentConstant[1] = 1 / (sin(alpha2)*v2 * ((td2 ** 3.)))  # parent1 constant
+    # Note parents cannot collide with themselves
     # Creating the Output Data
     MomData = np.zeros((7, N))  # 0-rd,1-td,2-e,3-vrel1,4-vrel2,5-Rcol1,6Rcol2
     MomData[0:2, :] = TempMomData[0:2, :]  # momentums
-    MomData[2, :] = TempMomData[7, :]  # eccentricity
+    MomData[2, :] = newe(TempMomData[0, :], TempMomData[1, :] / R, R, Mstar) # eccentricity
     MomData[3:5, :] = TempMomData[3:5, :]  # Vrels
-    MomData[5:7, :] = RcolParents  # Col prob without the radius squared in dfsize units
+       # Col prob without the radius squared in dfsize units
+    MomData[5, :] =(PConstant * ParentConstant[0] * (dfSize ** 2.)) / ((TempMomData[1, :] / R) ** 3.)
+    MomData[6, :] = (PConstant * ParentConstant[1] * (dfSize ** 2.)) / ((TempMomData[1, :] / R) ** 3.)
 
-    '''
-    plt.figure()
-    plt.plot(H[1:N],np.log10(MomData[5,1:N]),label='Rcol parent1')
-    plt.plot(H[0:N-1], np.log10(MomData[6, 0:N-1]), label='Rcolparent 2')
-    plt.legend()
-    plt.show()
-    '''
+
 
     return MomData
+
 
 
 @jit
 def Evolution(N):
 
-    TimeStep = 0.1* year  # *(10**3.)
-    T = 10 ** 6  # number of Timesteps
+    TimeStep = 1* year  # *(10**3.)
+    T = 10 ** 7  # number of Timesteps
     J = 4  # fragment radius bins
     #N = 500
     # Loading MomData
     MomData = MomDataCalc(N)
-    MomData[5:7, :] = TimeStep * MomData[5:7, :]
+    MomData[5:7, :] = TimeStep * MomData[5:7, :] #turning from a rate to a number of fragments
 
     # Setting up distributions
-    TempT = int(10 ** 4.)
+    TempT = int(10 ** 5.)
     print('TempT', TempT)
     ShowT = int(T / TempT)
     print('ShowT', ShowT)
@@ -116,7 +109,7 @@ def Evolution(N):
 
     # Parent Setup
     # Starting fragment distribution
-    TotalMass=10**6.
+
     for f in range(1, J + 1):
         Dist[f, 0, 0] = (2 * f * dfSize) ** (-3.5)
         Dist[0, 0, 0] += Dist[f, 0, 0]*(f**3.)
@@ -177,7 +170,7 @@ def Evolution(N):
                     TempDist[f, 0, t + 1] -= Rcolmat
                     TempDist[fp, N - 1, t + 1] -= Rcolmat
 
-            '''
+
             # Parent-Child Collision loop
             for p in (0, 1):  # parents 1 or 2
                 npar=nparent[p]
@@ -192,7 +185,7 @@ def Evolution(N):
                             TempDist[f, n, t + 1] -= Rcolmat  # can get minus number of fragments, needs to remain super large
                             TempDist[fp, npar, t + 1] -= Rcolmat
 
-            '''
+
 
 
 
@@ -215,6 +208,8 @@ def ParentMassGraphs(N):
     plt.figure()
     plt.plot(ShowTspace, Dist[0, 0, :], label='First Parent Mass')
     plt.plot(ShowTspace, Dist[0, N - 1, :], label='Second Parent Mass')
+    testfunc=(2*TotalMass)/(1+np.exp(2*TotalMass*ShowTspace*(10**-12.)))
+    plt.plot(ShowTspace,testfunc, label='mass guess')
     plt.legend()
     plt.show()
     return
@@ -239,7 +234,7 @@ def EvolutionGraphs(N):
     ShowT = np.size(Dist[0, 0, :])
     H = np.linspace(0, 1, N)
     #plt.figure()
-    Graphnum=5
+    Graphnum=10
     step=int(round(ShowT/Graphnum))
     for t in range(0, ShowT,step):
         plt.figure()
@@ -255,14 +250,35 @@ def Timing():
     Evolution(N)
     return
 
+def RcolPlot(N):
+    MomData=MomDataCalc(N)
+    H = np.linspace(0, 1, N)
+    plt.figure()
+    plt.plot(H[1:N],np.log10(MomData[5,1:N]),label='Rcol parent1')
+    plt.plot(H[0:N-1], np.log10(MomData[6, 0:N-1]), label='Rcolparent 2')
+    plt.legend()
+    #plt.show()
+    return
 
+def VrelPlot(N):
+    MomData = MomDataCalc(N)
+    H = np.linspace(0, 1, N)
+    plt.figure()
+    plt.plot(H[1:N], MomData[3, 1:N], label='Vrel parent1')
+    plt.plot(H[0:N - 1], MomData[4, 0:N - 1], label='Vrel parent 2')
+    plt.legend()
+    #plt.show()
+    return
 
-
-#EvolutionGraphs(500)
+#VrelPlot(500)
+#RcolPlot(500)
+#plt.show()
+EvolutionGraphs(500)
 #ParentMassGraphs(500)
-TotalMassGraphs(500)
+#TotalMassGraphs(500)
 
 
 #print(timeit.timeit(Timing, number=3))
 #cProfile.runctx('Timing()',globals=globals(),locals=locals(),filename='Test.profile')
 #python -m pstats ComponentSpaceAnalysis\Test.profile
+

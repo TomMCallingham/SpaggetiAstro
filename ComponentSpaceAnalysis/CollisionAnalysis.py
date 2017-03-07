@@ -42,12 +42,12 @@ def CollisionAngle(x,a1,e1,s1,a2,e2,s2):
     '''
     plt.figure()
     plt.plot(H,)
-    '''
+
 
     plt.figure()
     plt.plot(H,Angles1,label='angles1')
     plt.plot(H,Angles2, label='Angles2')
-    '''
+
     #trial
     plt.plot([0,1],[0,Angles1[N-1]], label='guess')
     plt.plot([0, 1], [Angles2[N - 1], 0], label='guess')
@@ -180,6 +180,12 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(H,MomentasData[7,:], label='eccentricity')
     plt.legend()
 
+    #EccentrocotyTimeCheck
+    plt.figure()
+    plt.plot(H, (1-MomentasData[7, :])**(-1.5), label='(1-e)**-1.5')
+    plt.legend()
+
+
     #TimePeriodGraph
     plt.figure()
     plt.plot(H, MomentasData[8, :]/year, label='TimePeriod in years')
@@ -191,13 +197,13 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(H[1:N-1], MomentasData[9, 1:(N-1)]/year, label='T1 in year')
     plt.plot(H[1:N-1],MomentasData[10,1:(N-1)]/year, label='T2 in years')
     plt.legend()
-
+    '''
     #Fractional Time Graph
     plt.figure()
     plt.plot(H[1:N - 1], MomentasData[9, 1:(N - 1)]/MomentasData[8,1:(N-1)], label='T1/T')
     plt.plot(H[1:N - 1], MomentasData[10, 1:(N - 1)]/MomentasData[8,1:(N-1)], label='T2/T')
     plt.legend()
-
+    '''
     #vplot
     plt.figure()
     plt.plot(H,MomentasData[2,:],label='v?')
@@ -231,7 +237,7 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(H[1:N - 1], MomentasData[3, 1:N - 1] / abs(np.sin(MomentasData[5, 1:N - 1])), label='vrel1/sin angle1')
     plt.plot(H[1:N - 1], MomentasData[4, 1:N - 1] / abs(np.sin(MomentasData[6, 1:N - 1])), label='vrel 2/sin angle2')
     plt.legend()
-    '''
+
     #vrel/vsin
     plt.figure()
     plt.plot(H[1:N - 1], MomentasData[3, 1:N - 1] / (MomentasData[2, 1:N - 1] *abs(np.sin(MomentasData[5, 1:N - 1]))), label='vrel1/vsin angle1')
@@ -239,26 +245,26 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(np.array([0.5,1]),(1/sin(alpha1))*np.array([1,1]),label='sincheck')
     plt.legend()
 
-
+    '''
     #Rcol
     Rcol=np.zeros((2,N))
     MomentaCol=np.zeros((2,N)) #orbit dependand part, 1 for each parent
     PConstant=(3 * ((G * Mstar) ** 4.) * pi)/(256*Rbeam*(R**12.))
     ParentConstant=np.zeros((2))
-    ParentConstant[0]=1#/(v1*((td1**3.))) #parent1 constant
-    ParentConstant[1] = 1# / (v2 * ((td2 ** 3.)))  # parent1 constant
+    ParentConstant[0]=1/(v1*((td1**3.))) #parent1 constant
+    ParentConstant[1] = 1/ (v2 * ((td2 ** 3.)))  # parent1 constant
     rsum=20 #largest fragments
 
-    MomentaCol[0,:]=(MomentasData[3,:]/(MomentasData[2,:]*((MomentasData[1,:]/R)**3.)*abs(np.sin(MomentasData[5,:])))) #parent1
-    MomentaCol[1, :] = (MomentasData[4, :] / (MomentasData[2, :] * ((MomentasData[1, :] / R) ** 3.) * abs(np.sin(MomentasData[6, :]))))#paernt2
+    MomentaCol[0,:]=(MomentasData[3,:]/(MomentasData[2,:]*((MomentasData[1,:]/R)**3.)*abs(np.sin(MomentasData[5,:]))))*((1-MomentasData[7, 0])**(1.5))*((1-MomentasData[7, :])**(1.5)) #parent1
+    MomentaCol[1, :] = (MomentasData[4, :] / (MomentasData[2, :] * ((MomentasData[1, :] / R) ** 3.) * abs(np.sin(MomentasData[6, :]))))*((1-MomentasData[7, N])**(1.5))*((1-MomentasData[7, :])**(1.5))#paernt2
 
     #year=
     Rcol[0,:]=PConstant*ParentConstant[0]*MomentaCol[0,:]*(dfSize ** 2.) * (rsum**2.)
     Rcol[1, :] = PConstant * ParentConstant[1] * MomentaCol[1, :] * (dfSize ** 2.) *( rsum**2.)
 
     plt.figure()
-    plt.plot(H,np.log10(Rcol[0,:]*year),label='log10 (Rcol year) Parent1')
-    plt.plot(H, np.log10(Rcol[1, :]*year), label='log10(Rcoll yaer) Parent2')
+    plt.plot(H,np.log10(Rcol[0,:]),label='log10 (Rcol year) Parent1')
+    plt.plot(H, np.log10(Rcol[1, :]*((1-MomentasData[7, N-1])**(1.5))*((1-MomentasData[7, :])**(1.5))), label='log10(Rcoll yaer) Parent2')
     plt.legend()
 
     plt.show()
@@ -276,5 +282,5 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
 
 
 
-MomentaData('b',2*au,0.99,0,2.1*au,0.993,2.1)
+MomentaData('a',2*au,0.99,0,2.1*au,0.993,2.1)
 #CollisionAngle('a',2,0.99,0,2.1,0.993,1.5)

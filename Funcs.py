@@ -18,6 +18,13 @@ def newe(Rdot,Thetadot,R,Mstar):
     e=np.sqrt((((((R**3.)*(Thetadot**2.))/u)-1)**2.)+(((Rdot**2.)*(R**4)*(Thetadot**2))/(u**2.)))
     return e
 
+def newa(rd,td,R,Mstar):
+    e=newe(rd,td,R,Mstar)
+    u = G * (Mstar)
+    a=((td**2.)*(R**4.))/(u*(1-(e**2.)))
+    return a
+
+
 def SEnergy(rdot, thetadot, r, Mstar):
     E=((((r*thetadot)**2.)+(rdot**2.))/2)-((G*Mstar)/r)
     return E
@@ -29,6 +36,7 @@ def thetakepler(R,Mstar):
 
 def hangle(a,e,m):
     return np.sqrt(G*m*a*(1-(e**2.)))
+
 #def thetadot(a,e,f,m):
   #  return hangle(a,e,m)/(npr(a,e,f)**2.)
 #def rdot(a, e, f, m):

@@ -23,7 +23,7 @@ s2=2
 dfSize = 1  #1 meter
 
 #Rbeam = 2.6e3 #from paper veras
-#TotalMass=2.26e14
+#TotalVol=2.26e14
 Rbeam=1e3
 TotalMass=1e6
 
@@ -113,7 +113,7 @@ def Evolution(N):
     for f in range(1, J + 1):
         Dist[f, 0, 0] = (2 * f * dfSize) ** (-3.5)
         Dist[0, 0, 0] += Dist[f, 0, 0]*(f**3.)
-    #print('TotalMass unscaled',Dist[0,0,0])
+    #print('TotalVol unscaled',Dist[0,0,0])
     Dist[1:J+1, 0, 0] = ((TotalMass/Dist[0,0,0])) * Dist[1:J+1, 0, 0]
     Dist[0, 0, 0]=10**6.
     Dist[:, N - 1, 0] = Dist[:, 0, 0]

@@ -1,10 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from ComponentSpaceAnalysis.TimeEvolution import Evolution
-from numba import jit
-
-
+import matplotlib.pyplot as plt
+import numpy as np
 
 fig=plt.figure()
 ax = fig.add_subplot(111, autoscale_on=False, xlim=(0, 2*np.pi), ylim=(-2, 2))

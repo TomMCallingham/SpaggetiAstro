@@ -102,10 +102,10 @@ def MineComGraph(x,a1,e1,s1,a2,e2,s2,Mstar):
     td1=thetadot(a1,e1,C-s1,Mstar)
     rd2 = rdot(a2, e2, C - s2, Mstar)
     td2 = thetadot(a2, e2, C - s2, Mstar)
-    tdk=thetakepler(R, Mstar)
+    #tdk=thetakepler(R, Mstar)
 
     plt.figure()
-    [rdmin, tdmin] = eSolver(rd1, td1, rd2, td2, tdk, R)
+    [rdmin, tdmin] = eSolver(rd1, td1, rd2, td2, R)
     emin=newe(rdmin,tdmin,R, Mstar)
     plt.plot(rdmin, R * tdmin, 'rs', label='Best')
     elines(R, Mstar)

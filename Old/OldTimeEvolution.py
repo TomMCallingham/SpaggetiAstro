@@ -137,8 +137,8 @@ def Evolution(x, a1, e1, s1, a2, e2, s2):
             # Parent-Parent Collision Loop
 
             Rcolmat=MomData[5,N-1]*CrossSec*np.outer(TempDist[:,0,t],TempDist[:,N-1,t])
-            #print('ncolmat',ncolmat)
-            #print('ncolmat[1,1]',ncolmat[1,1])
+            #print('ncolmatunrounded',ncolmatunrounded)
+            #print('ncolmatunrounded[1,1]',ncolmatunrounded[1,1])
             for fp in range(1, J + 1):
                 for f in range(1, J + 1):
                     # find output bin
@@ -157,8 +157,8 @@ def Evolution(x, a1, e1, s1, a2, e2, s2):
             # Parent-Child Collision loop
             for p in (0, 1):  # parents 1 or 2
                 for n in range(1, N - 1):  # Velocity Bin Loop
-                    '''ncolmat=n +np.round(MassFraction * (nparent[p] - n))
-                    ncolmat = ncolmat.astype(int)'''
+                    '''ncolmatunrounded=n +np.round(MassFraction * (nparent[p] - n))
+                    ncolmatunrounded = ncolmatunrounded.astype(int)'''
                     Rcolmat = MomData[5, N - 1] * CrossSec * np.outer(TempDist[:, n, t], TempDist[:, nparent[p], t])
                     for fp in range(1, J + 1):  # Parent Fragment loop
                         for f in range(1, J + 1):  # ChildFragment Loop

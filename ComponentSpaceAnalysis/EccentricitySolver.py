@@ -4,8 +4,10 @@ from KCollisions.NewOrbit import *
 from Funcs import *
 G =6.674e-11# 2.982e-27
 au= 1.496e11
-def eSolver(rd1,td1,rd2,td2,tdk,R):
-    Mstar=1.2e30
+Mstar=1.2e30
+def eSolver(rd1,td1,rd2,td2,R):
+    tdk = thetakepler(R, Mstar)
+
     #Remove R dimensions from r
     rd1=rd1/R
     rd2=rd2/R
@@ -51,13 +53,13 @@ def LambdaeGraph(a1,e1,a2,e2):
     Td1 = thetadot(a1, e1, C[:, :], Mstar)
     Rd2 = rdot(a2, e2, C[:, :] - L, Mstar)
     Td2 = thetadot(a2, e2, C[:, :] - L, Mstar)
-    Tdk = np.sqrt((G * Mstar) / (np.power((R[:, :]), 3)))
+    #Tdk = np.sqrt((G * Mstar) / (np.power((R[:, :]), 3)))
 
     MineData=np.zeros((2,3,N))
     for j in range(0,2):
         for i in range(0, N):
 
-            [MineData[j,1,i],MineData[j,2,i]]=eSolver(Rd1[j,i], Td1[j,i], Rd2[j,i], Td2[j,i], Tdk[j,i], R[j,i]) # rdmin, tdmin
+            [MineData[j,1,i],MineData[j,2,i]]=eSolver(Rd1[j,i], Td1[j,i], Rd2[j,i], Td2[j,i], R[j,i]) # rdmin, tdmin
             MineData[j,0,i]=newe(MineData[j,1,i],MineData[j,2,i],R[j,i],Mstar) # min eccentriciy
 
     plt.plot(L / pi, MineData[0,0, :], label='BestEccentricity of Collision a')

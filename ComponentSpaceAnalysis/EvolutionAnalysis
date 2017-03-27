@@ -1,5 +1,5 @@
 from ComponentSpaceAnalysis.Evolution import  *
-savename='DistSaveBinSplit.npy'
+savename='DistTempSave.npy'
 def ParentMassGraphs():
     Dist = np.load(savename)
     N = np.size(Dist[0, :, 0])
@@ -50,7 +50,9 @@ def EvolutionGraphs():
     step=int(round(ShowT/Graphnum))
     for t in range(0, ShowT,step):
         plt.figure()
-        plt.plot(H, Dist[0, :, t], label='t=%s' % t)
+        plt.plot(H, Dist[0, :, t], label='t=%se5years' % t)
+        plt.xlabel('H')
+        plt.ylabel('TotalVolume')
         plt.legend()
         plt.ylim([0, 1.5 * TotalVol])
 
@@ -140,8 +142,8 @@ def DifDistSave(Dist1name,Dist2name):
 
 #eccentricitygraphs()
 
-#EvolutionGraphs()
+EvolutionGraphs()
 #ParentMassGraphs()
-TotalMassGraphs()
+#TotalMassGraphs()
 #RcolPlot(500,10)
 #TotalMomentumPlot()

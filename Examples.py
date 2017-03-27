@@ -1,16 +1,16 @@
 import matplotlib as plt
 
-from EqualFragments.EqualMinimalOrbitCascade import*
 from KCollisions.MinimalOrbitCascade import*
+from Old.EqualFragments.EqualMinimalOrbitCascade import*
 
 
-def CollisionExample(K): #Demonstration of the orbit collider generating orbits
-    CollisionGraph(2*au,0.3,0,2.1*au,0.1,2,1.2e30,2e10,2e10,K)
+def CollisionExample(): #Demonstration of the orbit collider generating orbits
+    CollisionGraph(2*au,0.3,0,2.1*au,0.1,2,1.2e30,2e10,2e10)
     plt.show()
     return
 
 def CollisionEllipse(): #Demonstration of the orbit collider generating orbits
-    CollisionGraph(2*au,0.7,0.5,2.1*au,0.6,2,1.2e30,2e10,2e10,1)
+    CollisionGraph(2*au,0.1,0,2.1*au,0.6,2.7,1.2e30,2e10,2e10)
     plt.show()
     return
 
@@ -76,3 +76,5 @@ def EqualMinimalAsteroidLambdaEccentricity(N,Ns):
 
 
 #CollisionEllipse()
+CollisionEllipse()
+#CollisionofAsteroids(1)

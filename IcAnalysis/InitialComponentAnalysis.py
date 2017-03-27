@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 
-au= 1#149597871e3
-G = 2.982e-27#6.67408e-11
+au= 149597871e3
+G = 6.67408e-11
 
 def Segments(Indexes,Function): # finds the sections for which a graph is negative, given crossing points
     #print('Indexes',Indexes)
@@ -86,7 +86,7 @@ def ICLBestePlot(a1, e1, a2, e2, Mstar): #note masses make no difference
 #ICLBestePlot(2*au,0.99,2.1*au,0.993,1.2e30)
 
 
-def ICLVelocities(a1,e1,a2,e2,Mstar):
+def ICLVelocitiesGraph(a1, e1, a2, e2, Mstar):
     N=1000 # Choosing resolution badd word ah well
     L = np.linspace(0, 2 * pi, N)   #NOTE CHECK L def!! + or -
     R= np.zeros((2,N))  #radial collision points
@@ -135,4 +135,40 @@ def ICLVelocities(a1,e1,a2,e2,Mstar):
 
     return
 
-ICLVelocities(2*au,0.99,2.1*au,0.993,1.2e30)
+def ICLVelocities(a1, e1, a2, e2, Mstar):
+    N=1000 # Choosing resolution badd word ah well
+    L = np.linspace(0, 2 * pi, N)   #NOTE CHECK L def!! + or -
+    R= np.zeros((2,N))  #radial collision points
+    C = np.zeros((2, N))   #theta collision points
+
+    for i in range(1,N):
+        [[C[0,i], C[1,i]], [R[0,i], R[1,i]]] = CollisionPoints(a1, e1, 0, a2, e2, L[i])
+
+    Rdot1=np.zeros(N) # another (2,N) array. Note taken out masses, no differnece!
+    Thetadot1=np.zeros(N)
+    Rdot2=np.zeros(N)
+    Thetadot2=np.zeros(N)
+
+    vrelpar=np.zeros((N))
+    for i in range(1,N-1):
+        Rdot1[i] = rdot(a1, e1, C[0, i], Mstar)  # another (2,N) array. Note taken out masses, no differnece!
+        Thetadot1[i] = thetadot(a1, e1, C[0, i], Mstar)
+        Rdot2[i] = rdot(a2, e2, C[0, i] - L[i], Mstar)
+        Thetadot2[i] = thetadot(a2, e2, C[0, i] - L[i], Mstar)
+        vrelpar[i]=np.sqrt(((Rdot1[i]-Rdot2[i])**2.)+((R[0,i]*(Thetadot1[i]-Thetadot2[i]))**2.))
+    #print(L[0]/pi,L[N-1]/pi)
+    #print('vrelpar at L=0',vrelpar[0])
+    #print('vrelpar at L=2pi', vrelpar[N-1])
+    plt.figure()
+    plt.semilogy(L[1:N-2]/pi,vrelpar[1:N-2],label='vrelpar')
+    plt.xlabel('L/pi')
+    plt.ylabel('vrelpar')
+    plt.title([a1/au, e1, a2/au, e2])
+    plt.show()
+
+    return
+
+
+ICLVelocities(2 * au, 0.99, 2.1 * au, 0.993, 1.2e30)
+
+#ICLVelocitiesGraph(2 * au, 0.99, 2.1 * au, 0.993, 1.2e30)

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 
 au= 1#149597871e3
 G = 2.982e-27#6.67408e-11

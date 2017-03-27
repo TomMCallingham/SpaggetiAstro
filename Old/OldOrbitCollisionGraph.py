@@ -1,4 +1,4 @@
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 
 def EllipseCrossImpact(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
     F = np.linspace(0, 2 * pi, 100)

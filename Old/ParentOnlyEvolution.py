@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import linalg as nplg
 import matplotlib.pyplot as plt
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 import timeit
 from numba import jit, int32,float64
 import cProfile

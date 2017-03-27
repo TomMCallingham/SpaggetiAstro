@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import linalg as nplg
 import matplotlib.pyplot as plt
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 Mstar=1.2e30
 au=1.496e11
 year=3.154e+7

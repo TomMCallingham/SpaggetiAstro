@@ -1,6 +1,6 @@
 import numpy as np
 from Funcs import *
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 import matplotlib.pyplot as plt
 
 def KEnergy(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):

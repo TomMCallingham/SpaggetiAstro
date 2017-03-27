@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 from Funcs import *
 G =6.674e-11# 2.982e-27
 au= 1.496e11
@@ -35,12 +35,12 @@ def eSolver(rd1,td1,rd2,td2,R):
 
     return [rdmin,tdmin]
 
-def LambdaeGraph(a1,e1,a2,e2):
-    Mstar=1.2e30
+def LambdaeData(a1,e1,a2,e2):
 
 
 
-    N = 1000# Choosing resolution badd word ah well
+
+    N = 100# Choosing resolution badd word ah well
     L = np.linspace(0, 2 * pi, N+2)  # NOTE CHECK L def!! + or -
     L=L[1:N+1]
     R = np.zeros((2, N))  # radial collision points
@@ -62,17 +62,26 @@ def LambdaeGraph(a1,e1,a2,e2):
             [MineData[j,1,i],MineData[j,2,i]]=eSolver(Rd1[j,i], Td1[j,i], Rd2[j,i], Td2[j,i], R[j,i]) # rdmin, tdmin
             MineData[j,0,i]=newe(MineData[j,1,i],MineData[j,2,i],R[j,i],Mstar) # min eccentriciy
 
-    plt.plot(L / pi, MineData[0,0, :], label='BestEccentricity of Collision a')
-    plt.plot(L / pi, MineData[1,0, :], label='BestEccentricity of Collision b')
+
+
+    return MineData #0-emin1-rdmin,2-tdmin,
+
+
+def LambdaeGraph(a1,e1,a2,e2):
+    MineData=LambdaeData(a1,e1,a2,e2)
+    N=np.size(MineData[0,0,:])
+    L = np.linspace(0, 2 * pi, N + 2)  # NOTE CHECK L def!! + or -
+    L = L[1:N + 1]
+    plt.plot(L / pi, MineData[0, 0, :], label='BestEccentricity of Collision a')
+    plt.plot(L / pi, MineData[1, 0, :], label='BestEccentricity of Collision b')
     plt.legend()
     plt.xlabel('Lambda/pi')
     plt.ylabel('Best Eccentricity')
-
     plt.show()
-
     return
 
-#LambdaeGraph(2*au,0.99,2*au,0.993)
+
+LambdaeGraph(2*au,0.99,2*au,0.993)
 
 
 

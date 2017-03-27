@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from KCollisions.NewOrbit import *
+from KCollisions.KNewOrbit import *
 
 
 def MinimalOrbitCascade(a1,e1,s1,a2,e2,s2,Mstar,m1,m2,K,N): #Note at the moment N<=6, else the array is too large

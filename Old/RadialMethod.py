@@ -1,5 +1,5 @@
 from Funcs import *
-from KCollisions.NewOrbit import CollisionPoints
+from KCollisions.KNewOrbit import CollisionPoints
 
 def RadialMethod(a1,e1,s1,a2,e2,s2,Mstar,m1,m2):
     [[ca, cb], [ra, rb]] =CollisionPoints(a1, e1, s1, a2, e2, s2)

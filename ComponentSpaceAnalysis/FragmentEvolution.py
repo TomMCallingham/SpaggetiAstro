@@ -44,7 +44,7 @@ def RcolCalc(N):
     elif x == 'b':
         R = CollisionData[1, 1]
         C = CollisionData[0, 1]
-
+    print('R in au',R)
     # setting up the parent data
     rd1 = rdot(a1, e1, C - s1, Mstar)
     td1 = thetadot(a1, e1, C - s1, Mstar)

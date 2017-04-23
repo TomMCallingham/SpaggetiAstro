@@ -2,6 +2,8 @@ from math import *
 import numpy as np
 G =6.674e-11# 2.982e-27
 au= 1.496e11
+year = 3.154e+7
+Mstar = 1.2e30
 
 def rdot(a,e,f,m):
     return np.sqrt((G*m)/(a*(1-(e**2))))*e*np.sin(f)
@@ -37,11 +39,18 @@ def thetakepler(R,Mstar):
 def hangle(a,e,m):
     return np.sqrt(G*m*a*(1-(e**2.)))
 
+
+def Timeperiod(a): #a in au
+    a=a*au
+    T=(2*pi)*np.sqrt((a**3.)/(G*Mstar))
+    T=T/year
+    #print(T)
+    return
 #def thetadot(a,e,f,m):
   #  return hangle(a,e,m)/(npr(a,e,f)**2.)
 #def rdot(a, e, f, m):
    # return A(a, e, m) * e * np.sin(f)
-
+'''
 def A(a, e, m):
     Acalc = np.sqrt((G * m) / (a * (1 - (e ** 2.))))
     return Acalc
@@ -50,3 +59,6 @@ def A(a, e, m):
 def r(a, e, f):  # note f is from the pericentere, not reference
     return (a * (1 - (e ** 2))) / (1 + (e * cos(f)))
 
+'''
+#Timeperiod(2.5)
+#Timeperiod(2.4)

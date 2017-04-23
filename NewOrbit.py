@@ -17,12 +17,12 @@ def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points
     c1= acos((-(alpha * beta) + sqrt(((alpha * beta) ** 2) - (((alpha ** 2) + 1) * ((beta ** 2) - 1)))) / ((alpha ** 2) + 1)) + s1
     if abs(alpha*cos(c1-s1)+beta-sin(c1-s1))>10e-6 : #checking the degeneracy of arccos
         c1 = 2*pi -(c1-2*s1)
-    r1=r(a1,e1,c1-s1)
+    r1=npr(a1,e1,c1-s1)
     #the second solution
     c2= acos((-(alpha * beta) - sqrt(((alpha * beta) ** 2) - (((alpha ** 2) + 1) * ((beta ** 2) - 1)))) / ((alpha ** 2) + 1)) + s1
     if abs(alpha*cos(c2-s1)+beta-sin(c2-s1))>10e-6:
         c2 = 2*pi - (c2-2*s1)
-    r2=r(a1,e1,c2-s1)
+    r2=npr(a1,e1,c2-s1)
     #Output is the two collision points in angle and radius in an array
     CollisionData=np.array([[c1,c2],[r1,r2]])
     return CollisionData
@@ -92,14 +92,19 @@ def RadialGraph(a1,e1,a2,e2):
     for i in range(1,1000):
         [[c1, c2], [R[0,i], R[1,i]]] = CollisionPoints(a1, e1, 0, a2, e2, -L[i])
      #now in au Units, no scaling needed (1/au)*R
-    plt.plot(L[1:1000],R[0,1:1000],label="Collision Point 1")
-    plt.plot(L[1:1000], R[1, 1:1000], label="Collision Point 2")
-    plt.plot([0,2*pi],[1,1], label="1 au")
+    '''
+    plt.plot(L[1:1000],R[0,1:1000]/au,label="Collision Point a")
+    plt.plot(L[1:1000], R[1, 1:1000]/au, label="Collision Point b")
+    '''
+    plt.semilogy(L[1:1000]/pi, R[0, 1:1000] / au, label="Collision Point a")
+    plt.semilogy(L[1:1000]/pi, R[1, 1:1000] / au, label="Collision Point b")
+    plt.semilogy([0,2],[0.017,0.017], label='Roche Radius')
+    #plt.plot([0,2*pi],[1,1], label="1 au")
     plt.legend() #attaching a legend to the graph
     plt.title('Radius of the Collision Points against Lambda')
-    plt.xlabel('Lambda, Sepetation of the Orbits')
-    plt.ylabel('Radius of the the Collision Points (au)')
-    plt.xlim([0,2*pi])
+    plt.xlabel('Lambda/pi,')
+    plt.ylabel('Radius of the the Collision Points /au')
+    plt.xlim([0,2])
     plt.show()
     return
 
@@ -178,6 +183,6 @@ def SequenceCollisionGraph(ap1,ep1,sp1,ap2,ep2,sp2):
     plt.show()
     #print([ac1/au, ec1, sc1])
     return
-SequenceCollisionGraph(2*au,0.9,0,2.1*au,0.8,1)
+#SequenceCollisionGraph(2*au,0.9,0,2.1*au,0.8,1)
 
-
+RadialGraph(2.5*au,0.998,2.4*au,0.995)

@@ -11,35 +11,40 @@ plt.style.use('classic')
 Mstar=1.2e30
 def erdot(e,R,Thetadot): #gives an rdot from r, positive only
     u=G*Mstar
-    Rdot=(u/((R**2.)*abs(Thetadot)))*np.sqrt((e**2.)-(((((R**3.)*(Thetadot**2.))/u)-1)**2.))
+    Rdot=(u/((R**2.)*abs(Thetadot)))*np.sqrt(abs((e**2.)-(((((R**3.)*(Thetadot**2.))/u)-1)**2.)))
     return Rdot
 
 def erdotdefdata(e,R,n):
-    ThetaBottom=(np.sqrt(1-e))*thetakepler(R,Mstar)
-    ThetaTop = (np.sqrt(1+e)) * thetakepler(R, Mstar)
+    ThetaBottom=(np.sqrt(1-e))*thetakepler(R,Mstar) #Would be 0!
+    ThetaTop = (np.sqrt(1+e)) * thetakepler(R, Mstar)  #Would be at escape
+    '''
     ThetaDot=np.linspace(ThetaBottom,ThetaTop,n+2)
     RDot=erdot(e,R,ThetaDot[1:n+1]) #ThetaDot[1:n+1]
+    '''
+    ThetaDot = np.linspace(ThetaBottom, ThetaTop, n)
+    RDot = erdot(e, R, ThetaDot[:])  # ThetaDot[1:n+1]
+
     eMomentas=np.zeros((2,2*n))
-    eMomentas[0,0:n]=ThetaDot[1:n+1]
+    eMomentas[0,0:n]=ThetaDot[:]#ThetaDot[1:n+1]
     eMomentas[1,0:n]=RDot[:]
     eMomentas[:,n:((2*n)+1)]=np.fliplr(eMomentas[:,0:n])
     eMomentas[1,n:((2*n)+1)]=-eMomentas[1,n:((2*n)+1)]
     return eMomentas
 def elines(R):
     n=10000
-    plt.plot(0, R*thetakepler(R, Mstar), 'ro', label='e=0')
+    plt.plot(0, R*thetakepler(R, Mstar)/1000, 'ro', label='e=0')
     for i in np.arange(0.1, 1.1, 0.1):
         eMomentas = erdotdefdata(i, R, n)
-        plt.plot(eMomentas[1, :], R * eMomentas[0, :], label='e=%s' % i)
+        plt.plot(eMomentas[1, :]/1000, R * eMomentas[0, :]/1000, label='e=%s' % i)
     return
 
 def eGraph(R):
     n=10000
     plt.figure()
     elines(R)
-    plt.xlabel('Rdot')
-    plt.ylabel('R*ThetaDot')
-    plt.title('Lines of Constant e')# with R=%s'%R)
+    plt.xlabel('Rdot Km/s')
+    plt.ylabel('R*ThetaDot Km/s')
+    plt.title('Lines of Constant e with R=%sau'%(R/au))
     plt.legend()
     plt.show()
     return
@@ -145,6 +150,6 @@ def MineComGraph(x,a1,e1,s1,a2,e2,s2,Mstar):
 #erdotdefdata(0.2,1, 10)
 #print(plt.style.available)
 
-#eGraph(1)
+eGraph(0.1*au)
 
 #esolvertest('a',2,0.99,0,2.1,0.993,2)

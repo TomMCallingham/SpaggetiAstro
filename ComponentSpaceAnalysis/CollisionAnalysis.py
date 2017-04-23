@@ -185,13 +185,13 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(H, (1-MomentasData[7, :])**(-1.5), label='(1-e)**-1.5')
     plt.legend()
 
-
+    '''
     #TimePeriodGraph
     plt.figure()
     plt.plot(H, MomentasData[8, :]/year, label='TimePeriod in years')
     #plt.plot(np.array([0,1]),((2*pi)/sqrt(G*Mstar))*np.array([a1**1.5,a2**1.5]),'o',label='check')
     plt.legend()
-
+    '''
     #Collision Time Graph
     plt.figure()
     plt.plot(H[1:N-1], MomentasData[9, 1:(N-1)]/year, label='T1 in year')
@@ -245,7 +245,7 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(np.array([0.5,1]),(1/sin(alpha1))*np.array([1,1]),label='sincheck')
     plt.legend()
 
-    '''
+    
     #Rcol
     Rcol=np.zeros((2,N))
     MomentaCol=np.zeros((2,N)) #orbit dependand part, 1 for each parent
@@ -266,7 +266,7 @@ def MomentaData(x,a1,e1,s1,a2,e2,s2):
     plt.plot(H,np.log10(Rcol[0,:]),label='log10 (Rcol year) Parent1')
     plt.plot(H, np.log10(Rcol[1, :]*((1-MomentasData[7, N-1])**(1.5))*((1-MomentasData[7, :])**(1.5))), label='log10(Rcoll yaer) Parent2')
     plt.legend()
-
+    '''
     plt.show()
 
     return MomentasData

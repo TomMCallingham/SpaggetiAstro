@@ -15,8 +15,8 @@ au = 1.496e11
 year = 3.154e+7
 #Setup
 x='a'
-a1=2*au
-e1=0.99
+a1=2.5*au
+e1=0.995
 s1=0
 a2=2.1*au
 e2=0.993
@@ -26,7 +26,7 @@ dfSize = 1  #1 meter
 #Rbeam = 2.6e3 #from paper veras
 #TotalVol=2.26e14
 Rbeam=1e3
-TotalVol=1e10
+TotalVol=1e13 # increased by 1000, ie size increase of 10
 
 
 @jit
@@ -111,26 +111,38 @@ def Evolution(N, J, TotalTime):
     InitialDist=InitialDistCalc(J)
     RcolMat = RcolCalc(N)
     RcolMat =  (dfSize ** 2.) *RcolMat #turning from a rate to a number of fragments
-
-    TimeStepMin=(1/(100*np.max(RcolMat)*2*(1**2.)*2*InitialDist[1]))/year
+    '''
+    TimeStepMin=(1/(100*np.max(RcolMat)*2*(1**2.)*2*InitialDist[1]))/year #min timestep changes 1/100 WHAT AM I DOING HERE?
     TimeStepMinRound=int(10**floor(log10(TimeStepMin)))
+    if TimeStepMinRound==0:
+        TimeStepMinRound=1
 
     TimeStep = TimeStepMinRound * year
+   
+    print('TimeStep', TimeStepMin)
     #TotalTime=2 * (10 ** Tpower)
-    T = int(TotalTime/TimeStepMinRound)  # number of Timesteps
-    print('T',T)
-    print('TimeStep',TimeStepMinRound)
 
+    TimeStep = 100 * year
+    '''
+    TimeStep=0.1 #in years
 
-    RcolMat = TimeStep *  RcolMat
-    # Setting up distributions
+    T = int(TotalTime/TimeStep)  # number of Timesteps
     TempT = int(10 ** 3.)
 
     ShowT = int(T / TempT)
     print('TempT', TempT)
     print('ShowT', ShowT)
 
-    print((TempT * TimeStep) / year)
+    print('T',T)
+    print((TempT * TimeStep))  # /year)
+
+
+
+    RcolMat = TimeStep *  RcolMat*year
+    # Setting up distributions
+
+
+    #print((TempT * TimeStep) / year)
     TempDist = np.zeros((J + 1, N, TempT + 1))
     Dist = np.zeros((J + 1, N, ShowT + 1))
 
@@ -179,7 +191,7 @@ def Evolution(N, J, TotalTime):
         for f in range(1, J + 1):
             Dist[0, :, tshow + 1] += Dist[f, :, tshow + 1] * ((dfSize*f) ** 3.)
 
-    print((TempT * TimeStep)/year)
+
     return Dist
 
 
@@ -196,6 +208,8 @@ def Timing():
     return
 
 
+#savedist(201,1,(10**4.))
+
 #RcolCalc(201)
 #print(InitialDistCalc(1))
 #timeit.timeit(stmt=savedist(201,10,2*(10**7.)), number=1)
@@ -204,7 +218,6 @@ def Timing():
 #ncolMattest=ncolMatCalcnoround(11,1)
 #print(ncolMattest[:,:,1,1,0])
 #print(ncolMattest[:,:,1,1,1])
-savedist(201,10,2*(10**7.))
 #EvolutionGraphs()
 #ParentMassGraphs()
 #TotalMassGraphs()

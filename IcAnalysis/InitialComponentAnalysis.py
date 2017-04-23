@@ -5,6 +5,28 @@ from KCollisions.KNewOrbit import *
 
 au= 149597871e3
 G = 6.67408e-11
+Mstar=1.2e30
+
+a1=2.5 * au
+e1= 0.998 #0.998
+a2= 2.4 * au
+e2=0.997 #0.995
+'''
+a1=25 * au
+e1= 0.9997
+a2= 25 * au
+e2=0.9999
+'''
+I1 = 0
+I2 = 1* ((2 * pi) / 360)  # in degrees
+
+def TPrecess(a,e):
+    Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5)*(10**6.) #in Yrs
+    wp = (2 * np.pi) / Tp
+    return (Tp,wp)
+
+(Tp1,wp1)=TPrecess(a1,e1)
+(Tp2,wp2)=TPrecess(a2,e2)
 
 def Segments(Indexes,Function): # finds the sections for which a graph is negative, given crossing points
     #print('Indexes',Indexes)
@@ -86,7 +108,7 @@ def ICLBestePlot(a1, e1, a2, e2, Mstar): #note masses make no difference
 #ICLBestePlot(2*au,0.99,2.1*au,0.993,1.2e30)
 
 
-def ICLVelocitiesGraph(a1, e1, a2, e2, Mstar):
+def ICLVelocitiesGraph():
     N=1000 # Choosing resolution badd word ah well
     L = np.linspace(0, 2 * pi, N)   #NOTE CHECK L def!! + or -
     R= np.zeros((2,N))  #radial collision points
@@ -104,21 +126,53 @@ def ICLVelocitiesGraph(a1, e1, a2, e2, Mstar):
     Thetadot2=thetadot(a2, e2, C[:, :]-L,  Mstar)
     RThetadot2 = R * Thetadot2
    # ThetadotK2 = Thetadot2-ThetaKepler
+    '''
+    Vinc1=np.zeros((2,3,N))
+    Vinc2=np.zeros((2,3,N))
+    vrelpar = np.zeros((2, N))
+    for i in range(1,N-1):
+        for x in (0,1):
+            Vinc1[x,:,i]=np.array([Rdot1[x,i],R[x,i]*Thetadot1[x,i]*cos(I1),R[x,i]*Thetadot1[x,i]*sin(I1)])
+            Vinc2[x, :, i] = np.array(
+                [Rdot2[x, i], R[x, i] * Thetadot2[x, i] * cos(I2), R[x, i] * Thetadot2[x, i] * sin(I2)])
 
+            vrelpar[x, i] = np.linalg.norm(Vinc1[x, :, i] - Vinc2[x, :, i])
+    '''
+
+    Vinc1 = np.zeros((2, 3, N))
+    Vinc2 = np.zeros((2, 3, N))
+    vrelpar = np.zeros((2, N))
+    v1=np.zeros((2, N))
+    v2=np.zeros((2, N))
+    gammangle=np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            Vinc1[x, :, i] = np.array(
+                [Rdot1[x, i], R[x, i] * Thetadot1[x, i] * cos(I1), R[x, i] * Thetadot1[x, i] * sin(I1)])
+            Vinc2[x, :, i] = np.array(
+                [Rdot2[x, i], R[x, i] * Thetadot2[x, i] * cos(I2), R[x, i] * Thetadot2[x, i] * sin(I2)])
+            vrelpar[x, i] = np.linalg.norm(Vinc1[x, :, i] - Vinc2[x, :, i])
+            v1[x,i]=np.sqrt((Rdot1[x,i]**2.)+((R[x,i]*Thetadot1[x,i])**2.))
+            v2[x, i] = np.sqrt((Rdot2[x, i] ** 2.) + ((R[x, i] * Thetadot2[x, i] )** 2.))
+            gammangle[x,i]=np.arccos(np.vdot(Vinc1[x,:,i],Vinc2[x,:,i])/(v1[x,i]*v2[x,i]))
+    '''
+
+    #graph of all velocities
     plt.figure()
     plt.subplot(211)
-    plt.plot(L/(pi),abs(Rdot1[0,:]), label='rd1 at a')
+    plt.plot(L/(pi),Rdot1[0,:], label='rd1 at a')
     plt.plot(L/(pi),RThetadot1[0,:],label='rtd1 at a')
-    plt.plot(L/(pi), abs(Rdot2[0, :]), label='rd2 at a')
+    plt.plot(L/(pi), Rdot2[0, :], label='rd2 at a')
     plt.plot(L / ( pi), RThetadot2[0, :], label='rtd2 at a')
     plt.legend()
     plt.subplot(212)
-    plt.plot(L / ( pi), abs(Rdot1[1, :]), label='rd1 at b')
+    plt.plot(L / ( pi), Rdot1[1, :], label='rd1 at b')
     plt.plot(L / ( pi), RThetadot1[1, :], label='rtd1 at b')
-    plt.plot(L / ( pi), abs(Rdot2[1, :]), label='rd2 at b')
+    plt.plot(L / ( pi), Rdot2[1, :], label='rd2 at b')
     plt.plot(L / (pi), RThetadot2[1, :], label='rtd2 at b')
     plt.legend()
-
+    
+    #graph of angles
     plt.figure()
     angle1=np.arctan(Rdot1/RThetadot1)
     angle2 = np.arctan(Rdot2 / RThetadot2)
@@ -130,45 +184,114 @@ def ICLVelocitiesGraph(a1, e1, a2, e2, Mstar):
     plt.plot(L / pi, abs(angle1[1, :]/pi), label='angle 1 at b')
     plt.plot(L / pi, abs(angle2[1, :]/pi), label='angle 2 at b')
     plt.legend()
-    plt.show()
-
-
-    return
-
-def ICLVelocities(a1, e1, a2, e2, Mstar):
-    N=1000 # Choosing resolution badd word ah well
-    L = np.linspace(0, 2 * pi, N)   #NOTE CHECK L def!! + or -
-    R= np.zeros((2,N))  #radial collision points
-    C = np.zeros((2, N))   #theta collision points
-
-    for i in range(1,N):
-        [[C[0,i], C[1,i]], [R[0,i], R[1,i]]] = CollisionPoints(a1, e1, 0, a2, e2, L[i])
-
-    Rdot1=np.zeros(N) # another (2,N) array. Note taken out masses, no differnece!
-    Thetadot1=np.zeros(N)
-    Rdot2=np.zeros(N)
-    Thetadot2=np.zeros(N)
-
-    vrelpar=np.zeros((N))
+    
+    #graph of relative parent velocities
+    vrelpar=np.zeros((2,N))
     for i in range(1,N-1):
-        Rdot1[i] = rdot(a1, e1, C[0, i], Mstar)  # another (2,N) array. Note taken out masses, no differnece!
-        Thetadot1[i] = thetadot(a1, e1, C[0, i], Mstar)
-        Rdot2[i] = rdot(a2, e2, C[0, i] - L[i], Mstar)
-        Thetadot2[i] = thetadot(a2, e2, C[0, i] - L[i], Mstar)
-        vrelpar[i]=np.sqrt(((Rdot1[i]-Rdot2[i])**2.)+((R[0,i]*(Thetadot1[i]-Thetadot2[i]))**2.))
+        vrelpar[:,i]=np.sqrt(((Rdot1[:,i]-Rdot2[:,i])**2.)+((R[:,i]*(Thetadot1[:,i]-Thetadot2[:,i]))**2.))
     #print(L[0]/pi,L[N-1]/pi)
     #print('vrelpar at L=0',vrelpar[0])
     #print('vrelpar at L=2pi', vrelpar[N-1])
     plt.figure()
-    plt.semilogy(L[1:N-2]/pi,vrelpar[1:N-2],label='vrelpar')
+    plt.semilogy(L[1:N-2]/pi,vrelpar[0,1:N-2],label='vrelpar at a')
+    plt.semilogy(L[1:N - 2] / pi, vrelpar[1, 1:N - 2], label='vrelpar at b')
     plt.xlabel('L/pi')
-    plt.ylabel('vrelpar')
-    plt.title([a1/au, e1, a2/au, e2])
+    plt.ylabel('Relative Velocities of the parents, m/s')
+    plt.legend()
+    '''
+    
+    # graph of relative parent velocities - including Inclination
+
+    # print(L[0]/pi,L[N-1]/pi)
+    # print('vrelpar at L=0',vrelpar[0])
+    # print('vrelpar at L=2pi', vrelpar[N-1])
+    plt.figure()
+    plt.semilogy(L[1:N - 2] / pi, vrelpar[0, 1:N - 2], label='vrelpar at a')
+    plt.semilogy(L[1:N - 2] / pi, vrelpar[1, 1:N - 2], label='vrelpar at b')
+    plt.xlabel('L/pi')
+    plt.ylabel('Relative Velocities of the parents, m/s')
+    plt.legend()
+    plt.title('Relative Velocities of the parents, Inclination %s degrees' % (abs(I1 - I2) * (360 / (2 * pi))))
+
+
+
+    #h/dr
+    hoverdr = np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0,1):
+            #a=np.array([Rdot1[x,i],R[x,i]*Thetadot1[x,i]*cos(I1),R[x,i]*Thetadot1[x,i]*sin(I1)])
+            #b = np.array([Rdot2[x, i], R[x, i] * Thetadot2[x, i] * cos(I2), R[x, i] * Thetadot2[x, i] * sin(I2)])
+            hoverdr[x, i] =(((R[x,i]**2.)*Thetadot1[x,i]*Thetadot2[x,i]*sin(I1-I2))/np.linalg.norm(np.cross(Vinc1[x,:,i],Vinc2[x,:,i])))
+    hoverdr=abs(hoverdr)
+
+    dhdt = np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            # a=np.array([Rdot1[x,i],R[x,i]*Thetadot1[x,i]*cos(I1),R[x,i]*Thetadot1[x,i]*sin(I1)])
+            # b = np.array([Rdot2[x, i], R[x, i] * Thetadot2[x, i] * cos(I2), R[x, i] * Thetadot2[x, i] * sin(I2)])
+            dhdt[x, i] = (((R[x, i] ** 2.) * Thetadot1[x, i] * Thetadot2[x, i] * sin(I1 - I2)) / np.linalg.norm(
+                np.cross(Vinc1[x, :, i], Vinc2[x, :, i])))*(((wp1)*(Rdot1[x,i]/Thetadot1[x,i]))-(wp2)*(Rdot2[x,i]/Thetadot2[x,i]))
+    dhdt = abs(dhdt)
+
+    #contact time
+    '''
+    OLD METHOD
+    TcontactoRb = np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            TcontactoRb[x,i]=4/(hoverdr[x,i]*abs(((wp1)*(Rdot1[x,i]/Thetadot1[x,i]))-(wp2)*(Rdot2[x,i]/Thetadot2[x,i])))
+    '''
+
+    TcontactoRb = np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            TcontactoRb[x, i] = 4 / dhdt[x,i]
+
+
+    #low inclination
+    LowTcontactoRb= np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            LowTcontactoRb[x,i]=(4*((Rdot1[x,i]*Thetadot2[x,i])-(Rdot2[x,i]*Thetadot1[x,i])))/((((wp1)*(Rdot1[x,i]/Thetadot1[x,i]))-(wp2)*(Rdot2[x,i]/Thetadot2[x,i]))*R[x,i]*Thetadot1[x,i]*Thetadot2[x,i]*(I2-I1))
+    LowTcontactoRb=abs(LowTcontactoRb)
+
+
+
+
+    #hoverdrGraph
+    plt.figure()
+    plt.semilogy(L[1:N - 2] / pi, hoverdr[0, 1:N - 2], label='h/dr at a')
+    plt.semilogy(L[1:N - 2] / pi, hoverdr[1, 1:N - 2], label='h/dr at b')
+    plt.xlabel('Lambda/pi')
+    plt.ylabel('dh/dr, dimensionless')
+    plt.legend()
+
+    #dhdtGraph
+    plt.figure()
+    plt.semilogy(L[1:N - 2] / pi, dhdt[0, 1:N - 2], label='dh/dt at a')
+    plt.semilogy(L[1:N - 2] / pi, dhdt[1, 1:N - 2], label='dh/dt at b')
+    plt.xlabel('Lambda/pi')
+    plt.ylabel('dh/dt, m/yr')
+    plt.legend()
+
+    #ContactTime
+    plt.figure()
+    plt.semilogy(L[1:N - 2] / pi, TcontactoRb[0, 1:N - 2], label='Tcontact/Rbeam at a')
+    plt.semilogy(L[1:N - 2] / pi, TcontactoRb[1, 1:N - 2], label='Tcontact/Rbeam at b')
+    plt.xlabel('Lambda/pi')
+    plt.ylabel('Tcontact/Rbeam, years')
+    plt.title('Inclination difference of %s degrees'%(abs(I1-I2)*(360/(2*pi))))
+    plt.legend()
+
+
+
+
+
     plt.show()
+
 
     return
 
 
-ICLVelocities(2 * au, 0.99, 2.1 * au, 0.993, 1.2e30)
 
-#ICLVelocitiesGraph(2 * au, 0.99, 2.1 * au, 0.993, 1.2e30)
+ICLVelocitiesGraph()

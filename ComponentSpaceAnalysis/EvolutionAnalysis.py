@@ -142,8 +142,8 @@ def DifDistSave(Dist1name,Dist2name):
 
 #eccentricitygraphs()
 
-EvolutionGraphs()
+#EvolutionGraphs()
 #ParentMassGraphs()
 #TotalMassGraphs()
-#RcolPlot(500,10)
+RcolPlot(500,10)
 #TotalMomentumPlot()

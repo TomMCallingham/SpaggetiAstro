@@ -16,12 +16,12 @@ def CollisionPoints(a1,e1,s1,a2,e2,s2): #This function finds the crossing points
     c1= acos((-(alpha * beta) + sqrt(((alpha * beta) ** 2) - (((alpha ** 2) + 1) * ((beta ** 2) - 1)))) / ((alpha ** 2) + 1)) + s1
     if abs(alpha*cos(c1-s1)+beta-sin(c1-s1))>10e-6 : #checking the degeneracy of arccos
         c1 = 2*pi -(c1-2*s1)
-    r1=r(a1,e1,c1-s1)
+    r1=npr(a1,e1,c1-s1)
     #the second solution
     c2= acos((-(alpha * beta) - sqrt(((alpha * beta) ** 2) - (((alpha ** 2) + 1) * ((beta ** 2) - 1)))) / ((alpha ** 2) + 1)) + s1
     if abs(alpha*cos(c2-s1)+beta-sin(c2-s1))>10e-6:
         c2 = 2*pi - (c2-2*s1)
-    r2=r(a1,e1,c2-s1)
+    r2=npr(a1,e1,c2-s1)
     #Output is the two collision points in angle and radius in an array
     CollisionData=np.array([[c1,c2],[r1,r2]])
     return CollisionData

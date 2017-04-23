@@ -1,99 +1,127 @@
 import numpy as np
 import matplotlib.pyplot as plt
-density=2700 #emily suggestioj
+
+from KCollisions.KNewOrbit import *
+
+au= 149597871e3
+G = 6.67408e-11
+Mstar=1.2e30
+
+a1=2.5 * au
+e1= 0.998
+a2= 2.4 * au
+e2=0.995
+'''
+a1=25 * au
+e1= 0.9997
+a2= 25 * au
+e2=0.9999
+'''
+I1 = 0
+I2 = 10* ((2 * pi) / 360)  # in degrees
+
+density=2000 #emily suggestioj
 Qa=620
 Qb=(5e-6)*density
 a=0.5
 b=1.5
 vcol=1e5
-d2=1
+#d2=1
 def DispThres(D):
     Qd=(Qa*(D**-a))+(Qb*(D**b))
     return Qd
-
+def DispShattering(D):
+    Qs = (Qa * (D ** -a))
+    return Qs
 def DispGraph():
     N=100
-    D=np.linspace(-20,12,N)
+    D=np.linspace(-1,3,N)
     Q=np.zeros((N))
     for i in range(0,N):
         D[i]=10**D[i]
     Qd=DispThres(D)
-    Q=0.5*(vcol**2.)#0.5*((d2/D)**3.)*(vcol**2.)
-    #print('Q',Q)
+    Qs=DispShattering(D)
+    Q=0.5*(vcol**2.)#0.5*((d2/D)**3.)*(vcol**2.) Even mass fragments
     plt.figure()
-    plt.loglog(D,Qd,label=' Dispersion')
+    plt.loglog(D,Qd,label=' Qd')
+    plt.loglog(D, Qs, label=' Qs')
     #plt.loglog([D[0],D[N-1]],[Q,Q],label='Spec Energy')
-    plt.xlabel('Diameter D')
-    plt.ylabel('Dispesion Thresh')
+    plt.xlabel('Diameter D  meters')
+    plt.ylabel('Qd and Qs  J/kg')
     plt.legend()
+    plt.title('Dispersion and Shattering Threshold against Diamter')
     plt.show()
     return
+def flrfunc(vcol,D1,D2):
+    Q = 0.5 * (vcol ** 2.)*((D2/D1)**3.)
+    Qd=DispThres(D1)
+    if Q<Qd: # cratering
+        #print('Cratering')
+        flr=1-0.5*(Q/Qd)
+    if Q>=Qd: #shattering
+        #print('Shattering')
+        flr=0.5*((Qd/Q)**1.24)
 
 
-m1=1
-m2=1
-v1=10
-v2=30
-v3 = ((m1 * v1) + (m2 * v2)) / (m1 + m2)
-Epacket=((m1+m2)*(v3**2.))/2
-Ebefore=((m1*(v1**2.))+(m2*(v2**2.)))/2
+    return flr
 
-print('Epacket/Ebefore', Epacket / Ebefore)
-#Omega=100
-#alpha1=2
-def fdist1(v,v1,alpha1,K1):
-    fd1=K1*((v-v1)**alpha1)
-    return fd1
-def fdist2(v,v2,alpha2,K2):
-    fd2=K2*((v2-v)**alpha2)
-    return fd2
-def fdistcalc(Efrac):
 
-    if Efrac<=(Epacket/Ebefore):
-        print('Error, Energy below the packet')
-    Eafter=Efrac*Ebefore
+def ReductionGraph():
+    N = 1000  # Choosing resolution badd word ah well
+    L = np.linspace(0, 2 * pi, N)  # NOTE CHECK L def!! + or -
+    R = np.zeros((2, N))  # radial collision points
+    C = np.zeros((2, N))  # theta collision points
 
-    #print('Eafter',Eafter)
-    #print('Epacket',Epacket)
-    #print('Eafter-Epacket',(Eafter-Epacket))
-    Omega= (((m1*m2)/(m1+m2))*(((v2-v1))**2.))/(Eafter-Epacket)
-    #print('Eafter/Ebefore',Eafter/Ebefore)
-    alpha1=(+np.sqrt(1+(4*Omega))-5)/2
-    alpha2=alpha1
-    K1=m1*((1+alpha1)/((v3-v1)**(alpha1+1)))
-    K2 = m2 * ((1 + alpha2) / ((v2 - v3) ** (alpha2 + 1)))
-    v1space = np.linspace(v1, v3, 1000)
-    v2space = np.linspace(v3, v2, 1000)
-    fd1=fdist1(v1space,v1,alpha1,K1)
-    fd2 = fdist2(v2space, v2, alpha2, K2)
+    for i in range(1, N):
+        [[C[0, i], C[1, i]], [R[0, i], R[1, i]]] = CollisionPoints(a1, e1, 0, a2, e2, L[i])
+
+    Rdot1 = rdot(a1, e1, C[:, :], Mstar)
+    Thetadot1 = thetadot(a1, e1, C[:, :], Mstar)
+    Rdot2 = rdot(a2, e2, C[:, :] - L, Mstar)
+    Thetadot2 = thetadot(a2, e2, C[:, :] - L, Mstar)
+    Vinc1 = np.zeros((2, 3, N))
+    Vinc2 = np.zeros((2, 3, N))
+    vrelpar = np.zeros((2, N))
+    for i in range(1, N - 1):
+        for x in (0, 1):
+            Vinc1[x, :, i] = np.array(
+                [Rdot1[x, i], R[x, i] * Thetadot1[x, i] * cos(I1), R[x, i] * Thetadot1[x, i] * sin(I1)])
+            Vinc2[x, :, i] = np.array(
+                [Rdot2[x, i], R[x, i] * Thetadot2[x, i] * cos(I2), R[x, i] * Thetadot2[x, i] * sin(I2)])
+            vrelpar[x, i] = np.linalg.norm(Vinc1[x, :, i] - Vinc2[x, :, i])
+
+    '''
+    #vrel plot
     plt.figure()
-    plt.plot((v1space-v1)/(v2-v1), fd1, label='fd1')
-    plt.plot((v2space-v1)/(v2-v1), fd2, label='fd2')
-    #plt.scatter(v3,0,'v3')
-    plt.xlabel('position on velocity line')
-    plt.ylabel('distribution')
+    plt.semilogy(L[1:N-1],vrelpar[0,1:N-1],label='Vrel at a')
     plt.legend()
-    plt.title('m1/m2=%s, Eafter/Ebefore=%s alpha1=%.2f'%(m1/m2,Efrac,alpha1))
-
-    return
+    '''
 
 
 
+    plt.figure()
 
-def EfracGraphs():
+    flr = np.zeros(N)
+    dflr=np.zeros(N)
+    d2=1
+    for dfrac in range(-3,4):
+        d1=(10**dfrac)*d2
 
-    Efracs=np.linspace(Epacket/Ebefore+0.0001,0.9999,15)#[0.9001,0.91,0.92,0.93,0.94,0.95]
-    #print(np.size(Omegas))
-    for i in range(0,np.size(Efracs)):
-        fdistcalc(Efracs[i])
+        for i in range(1, N):
+            flr[i]=flrfunc(vrelpar[0, i],d1,d2)
+            dflr[i]=(flr[i])**(1/3)
+
+        plt.semilogy(L[1:N-1]/pi,dflr[1:N-1],label='D1/D2=10^%s'%((dfrac)))
+
+
+    plt.legend()
+    plt.title('reduction in D1 against Lambda')
     plt.show()
     return
 
+ReductionGraph()
+DispGraph()
 
 
 
 
-
-
-
-EfracGraphs()

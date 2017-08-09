@@ -1,0 +1,176 @@
+@jit
+def Evolution1(N,Tpower):
+    TimeStep = 1* year  # *(10**3.)
+    T = 10 ** Tpower  # number of Timesteps
+    #N = 500
+    # Loading MomData
+    RcolMat = RcolCalc(N)
+    RcolMat = TimeStep * (dfSize ** 2.) *RcolMat #turning from a rate to a number of fragments
+
+    # Setting up distributions
+    TempT = int(10 ** 4.)
+    print('TempT', TempT)
+    ShowT = int(T / TempT)
+    print('ShowT', ShowT)
+    TempDist = np.zeros((2, N, TempT + 1))
+    Dist = np.zeros((2, N, ShowT + 1))
+
+    # Initial Parent Setup
+    Dist[:,0,0]=InitialDistCalc(1)
+    Dist[:, N - 1, 0] = Dist[:, 0, 0]
+
+    # Setting up the collision bin results
+    MassFraction = np.zeros((2, 2))
+    CrossSecMat = np.zeros((2, 2))
+    '''
+    for i in range(1, 2):
+        for j in range(1, 2):
+            MassFraction[i, j] = (i ** 3.) / ((i ** 3.) + (j ** 3.))
+            CrossSecMat[i, j] = (i + j) ** 2.
+    '''
+    #collision bin calc
+    ncolmat=np.zeros((N,N))
+    for n1 in range(0, N-1):  # fragment 1
+        for n2 in range(n1+1, N):  # Velocity Bin Loop
+            ncolmat[n1,n2] = np.round((n1+n2)/2)
+    ncolmat = ncolmat.astype(int)
+
+
+    # Time Evolution
+    for tshow in range(0, ShowT):  # tshow loop
+        TempDist[1, :, 0] = Dist[1, :, tshow]
+        print('tshow', tshow)
+
+        for t in range(0, TempT):  # temp loop
+            TempDist[1, :, t + 1] = TempDist[1, :, t]  # new=old with changes
+            # All Collision loop
+            for n1 in range(0, N-1):  # velocity bin 1
+                for n2 in range(n1+1, N):  # Velocity Bin 2
+                    # print('n1,n2',n1,n2)
+                    colnumber = RcolMat[n1, n2] * 4 * TempDist[1, n1, t] * TempDist[1, n2, t]
+                    # Add
+                    TempDist[1, ncolmat[n1,n2], t + 1] += colnumber
+                    TempDist[1, ncolmat[n1,n2], t + 1] += colnumber
+                    # Remove
+                    TempDist[
+                        1, n2, t + 1] -= colnumber  # can get minus number of fragments, needs to remain super large
+                    TempDist[1, n1, t + 1] -= colnumber
+
+        #looping back around
+        Dist[1, :, tshow+1 ] = TempDist[1, :, TempT]
+        # Total Mass Sum
+        for f in range(1, 2):
+            Dist[0, :, tshow + 1] += Dist[f, :, tshow + 1] * (f ** 3.)
+    return Dist
+
+def RcolCalcInt(N):
+    # CollisionPoints
+    CollisionData = CollisionPoints(a1, e1, s1, a2, e2, s2)
+    if x == 'a':
+        R = CollisionData[1, 0]
+        C = CollisionData[0, 0]
+    elif x == 'b':
+        R = CollisionData[1, 1]
+        C = CollisionData[0, 1]
+
+    # setting up the parent data
+    rd1 = rdot(a1, e1, C - s1, Mstar)
+    td1 = thetadot(a1, e1, C - s1, Mstar)
+    V1 = np.array([rd1, R * td1])
+    v1 = nplg.norm(V1)
+    rd2 = rdot(a2, e2, C - s2, Mstar)
+    td2 = thetadot(a2, e2, C - s2, Mstar)
+    V2 = np.array([rd2, R * td2])
+    v2 = nplg.norm(V2)
+    Vrel = V2 - V1
+    vrel=nplg.norm(Vrel)
+
+    # Creating the TEmporary Momentum Data
+    TempMomData = np.zeros((4, N))  # 0-rd,1-R*td,2-v,3-alpha
+    H = np.linspace(0, 1, N)
+
+    for i in range(0, N):
+        TempMomData[0:2, i] = V1 + H[i] * Vrel # rd,R*td
+        TempMomData[2, i] = nplg.norm(TempMomData[0:2, i])  # v
+        TempMomData[3,i]=np.arccos(np.vdot(TempMomData[0:2, i],Vrel)/(TempMomData[2, i]*vrel))#alphacalc
+
+    # Rcol
+    RcolMat = np.zeros((N, N))
+    PConstant = (3 * ((G * Mstar) ** 4.) * pi) / (256 * Rbeam * (R ** 12.))
+    for i in range(0,N):
+        for j in range(0,N):
+            RcolMat[i,j]=1/(TempMomData[2,i]*abs(sin(TempMomData[3,i]))*(((TempMomData[1,i]/R)**3.)*(TempMomData[1,j]/R)**3.))
+
+    RcolMat=RcolMat*PConstant
+    return RcolMat
+@jit
+def Evolution1Integral(N,Tpower):
+    TimeStep = 1* year  # *(10**3.)
+    T = 10 ** Tpower  # number of Timesteps
+    #N = 500
+    # Loading MomData
+    RcolMat = RcolCalcInt(N)
+    RcolMat = TimeStep * (dfSize ** 2.) *RcolMat #turning from a rate to a number of fragments
+
+    # Setting up distributions
+    TempT = int(10 ** 4.)
+    print('TempT', TempT)
+    ShowT = int(T / TempT)
+    print('ShowT', ShowT)
+    TempDist = np.zeros((2, N, TempT + 1))
+    Dist = np.zeros((2, N, ShowT + 1))
+
+    # Initial Parent Setup
+    Dist[:,0,0]=InitialDistCalc(1)
+    Dist[:, N - 1, 0] = Dist[:, 0, 0]
+
+    # Setting up the collision bin results
+    MassFraction = np.zeros((2, 2))
+    CrossSecMat = np.zeros((2, 2))
+    '''
+    for i in range(1, 2):
+        for j in range(1, 2):
+            MassFraction[i, j] = (i ** 3.) / ((i ** 3.) + (j ** 3.))
+            CrossSecMat[i, j] = (i + j) ** 2.
+
+    #collision bin calc
+    ncolmatunrounded=np.zeros((N,N))
+    for n1 in range(0, N-1):  # fragment 1
+        for n2 in range(n1+1, N):  # Velocity Bin Loop
+            ncolmatunrounded[n1,n2] = np.round((n1+n2)/2)
+    ncolmatunrounded = ncolmatunrounded.astype(int)
+    '''
+
+
+    # Time Evolution
+    for tshow in range(0, ShowT):  # tshow loop
+        TempDist[1, :, 0] = Dist[1, :, tshow]
+        print('tshow', tshow)
+
+        for t in range(0, TempT):  # temp loop
+            TempDist[1, :, t + 1] = TempDist[1, :, t]  # new=old with changes
+            # All Collision loop
+            for n1 in range(0, N):  # velocity bin 1
+                I=0
+                for n2 in range(0, N):  # Velocity Bin 2
+                    I-=TempDist[1,n2,t]*(RcolMat[n2,n1]*TempDist[1,n1,t])
+                for n2 in range(max((2*n1)-N+1,0),min(2*n1,N)):
+                    #print((2 * n1) - n2)
+                    #print(n1)
+                    I+=(RcolMat[n2, (2 * n1) - n2] * TempDist[1, (2 * n1) - n2, t])
+                    #print(I)
+                TempDist[1, n1, t + 1] -= 4*I
+                #print('n1',n1)
+
+        #looping back around
+        Dist[1, :, tshow+1 ] = TempDist[1, :, TempT]
+        # Total Mass Sum
+        for f in range(1, 2):
+            Dist[0, :, tshow + 1] += Dist[f, :, tshow + 1] * (f ** 3.)
+    return Dist
+def savedistTest(N,Tpower):
+    Dist=Evolution1Integral(N,Tpower)
+    np.save(savename,Dist)
+    return
+
+

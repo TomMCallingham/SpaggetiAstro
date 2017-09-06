@@ -16,8 +16,12 @@ pmod=0.9
 #a1=0.999*a1
 I2=1* ((2 * pi) / 360)
 I1=0
+Rbeam=100*1e3
 
-
+def TPrecess(a,e):
+    Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5)*(10**6.) #in Yrs
+    wp = (2 * np.pi) / Tp
+    return (Tp,wp)
 
 (Tp1,wp1)=TPrecess(a1,e1)
 (Tp2,wp2)=TPrecess(a2,e2)
@@ -72,7 +76,7 @@ def TimeGraphs(rfrag, N):
     for i in range(1, N - 1):
         for x in (0, 1):
             Tpr[x,i] = TPrAnalytic(OrbitdataVdata[x, 0, i], OrbitdataVdata[x, 1, i]) * dflr[x, i]
-            Tcontact[x,i]=RcolwoATcontact(a1,e1,a2,e2,0,L[i],AB[x])[1]
+            Tcontact[x,i]=RcolwoATcontact(a1,e1,a2,e2,0,L[i],AB[x],I1,I2,Rbeam)[1]
 
     Tsep = min(Tp1,Tp2)/4
 
@@ -88,13 +92,17 @@ def TimeGraphs(rfrag, N):
 
 
     print('Times Found')
-    '''
+
     # vrel plot
     plt.figure()
-    plt.semilogy(s2[1:N - 1], vrelpar[0, 1:N - 1], label='Vrel at a')
-    plt.semilogy(s2[1:N - 1], vrelpar[1, 1:N - 1], label='Vrel at b')
+    plt.semilogy(L[1:N - 1], vrelpar[0, 1:N - 1], label='Vrel at a')
+    plt.semilogy(L[1:N - 1], vrelpar[1, 1:N - 1], label='Vrel at b')
     plt.legend()
-    '''
+    plt.figure()
+    plt.semilogy(L[1:N - 1], dflr[0, 1:N - 1], label='Reduction in Fragments')
+    plt.semilogy(L[1:N - 1], dflr[1, 1:N - 1], label='Reduction in Fragments')
+    plt.legend()
+
 
 
     return

@@ -3,53 +3,55 @@ from Summer.Evolution.RcolTContact import *
 from Summer.PR.TprAnalytic import *
 from Summer.Fragmentation.FragFuncs import *
 from numba import jit, int32,float64
+
+#Parent Orbits
 I1=0
-i2=10  #inlcination in degrees
+i2=1  #inlcination in degrees
 I2=(i2/360)*(2*pi)
-rsource1=3.1
-rsource2=3
+rsource1=3
+rsource2=10
 pmod=0.9
 s1i=1
 s2i=0
 (a1,e1)=orbitalvalues(rsource1)
 (a2,e2)=orbitalvaluesmod(rsource2,pmod)
+#Rbeam
+Rbeam=100e3
+#Masses and Sizes
+Rast1 = 100e3
+
+Rast2 = 100e3
+
+density=2e3
+TotalSystemMass=((4*pi)/3)*density*((Rast1**3.)+(Rast2**3.))
 rfrag = 1
 rmincol=1e-6
+#Times
 Tmax=4e7
 Tstep=1
 TstepLarge=100
 
-CrossDataFile='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/CrossData%s_%s_%s_%sMyr.npy' %(rsource1,rsource2,pmod,int(Tmax*(1e-6)))
-MonoDistName='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/100RBMonoAccretion%s_%s_%s_%s_%sMyr.npy' %(rsource1,rsource2,pmod,i2,int(Tmax*(1e-6)))
-ShrinkDistName='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/100RBShrinkMonoAccretion%s_%s_%s_%s_%sMyr.npy' %(rsource1,rsource2,pmod,i2,int(Tmax*(1e-6)))
+ADD=''#''HalfAst'
+
+DataFolder='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/'
+ID='(%s_%s_%s_i%s_rb%s_%sMyr)'%(rsource1,rsource2,pmod,i2,int(Rbeam/1000),(Tmax*(1e-6)))
+CrossDataFile=DataFolder +'CrossData_rs%s_rs%s_pm%s_%sMyr.npy' %(rsource1,rsource2,pmod,int(Tmax*(1e-6)))
+MonoDistName=DataFolder + ADD +'MonoAccretion_rs%s_rs%s_pm%s_i%s_rb%s_%sMyr.npy' %(rsource1,rsource2,pmod,i2,int(Rbeam/1000),(Tmax*(1e-6)))
+ShrinkDistName=DataFolder + ADD  +'ShrinkMonoAccretion_rs%s_rs%s_pm%s_i%s_rb%s_%sMyr.npy' %(rsource1,rsource2,pmod,i2,int(Rbeam/1000),int(Tmax*(1e-6)))
 
 
 
-def monoanalyticdelta(n1i,n2i,Rcol,t):
-    delta=n2i-n1i
-    n1=(n1i*delta*exp(-delta*Rcol*t))/((n1i*(1-exp(-delta*Rcol*t)))+delta)
-    n2=delta+n1
-    c=(n1i+n2i)-(n1+n2)
-    dc=2*Rcol*n1*n2
-    return(n1,n2,c,dc)
 
-def monoanalytic(n1i,n2i,Rcol,t):
-    n1=n1i/(1+(n1i*Rcol*t))
-    n2=n1
-    c=2*(n1i-n1)
-    dc=2*Rcol*n1*n2
-    return(n1,n2,c,dc)
 
 def MonoAccretion(a1,e1,a2,e2):
-    #Tstep=1
+    print('Starting Mono Evolution...')
     Tnumber=int(Tmax/Tstep)
 
-    Rast1=1e5
-    Rast2=1e5
+
     nini1=(Rast1/rfrag)**3.
     nini2 = (Rast2 / rfrag) ** 3.
 
-    print('Loading Data...')
+    print('Loading Cross Data...')
     CrossData = np.load(CrossDataFile) #t, lambda=s1-s2,s1,s2,+/-1,a=0 b=1,R,C
     print('Creating MonoDist')
     AB=['a','b']
@@ -66,8 +68,8 @@ def MonoAccretion(a1,e1,a2,e2):
 
     for m in range(0, M):
         print((m+1),'/',M)
-        ContactData[0:2,m]=RcolwoATcontact(a1,e1,a2,e2,CrossData[2,m],CrossData[3,m],AB[int(CrossData[5,m])]) #Rcol, Tcontact
-        ContactData[0,m]=ContactData[0,m]*4*(rfrag**2.)  #include cross sectional area!
+        ContactData[0:2,m]=RcolwoATcontact(a1,e1,a2,e2,CrossData[2,m],CrossData[3,m],AB[int(CrossData[5,m])],I1,I2,Rbeam) #Rcol, Tcontact
+        ContactData[0,m]=ContactData[0,m]*4*(rfrag**2.) *0.46 #include cross sectional area! and Averaging over movement
         ParentVelocities[0, :, m] = np.array([rdot(a1, e1, CrossData[7,m]-CrossData[2,m]),CrossData[6,m]*thetadot(a1, e1, CrossData[7,m]-CrossData[2,m])*cos(I1),CrossData[6,m]*thetadot(a1, e1, CrossData[7,m]-CrossData[2,m])*sin(I1) ]) #p1 veloc
         ParentVelocities[1, :, m] = np.array(
             [rdot(a2, e2, CrossData[7,m]-CrossData[3, m]), CrossData[6, m] * thetadot(a2, e2, CrossData[7,m]-CrossData[3, m]) * cos(I2), #p2 veloc
@@ -78,18 +80,6 @@ def MonoAccretion(a1,e1,a2,e2):
         ChildData[3, m] = newe(ChildData[0,m],ChildData[1,m],CrossData[6,m])
 
 
-        '''
-        print('Lambda/pi',CrossData[1,m]/pi)
-        print(AB[int(CrossData[5,m])])
-        print('P1:rd,r*tdcosI,r*td*sinI', ParentVelocities[0, :, m])
-        print('P2:rd,r*tdcosI,r*td*sinI', ParentVelocities[1, :, m])
-        print('C:rd,r*tdcosI,r*td*sinI',ParentVelocities[2,:,m])
-        print('collision rad',CrossData[6,m]/au)
-        print('Child rd',ChildData[0,m])
-        print('Child rtd', ChildData[1, m]*CrossData[6,m])
-        print('new a ', ChildData[2,m]/au)
-        print('new e ', ChildData[3, m])
-        '''
 
         ContactData[2,m]=TPrAnalytic(ChildData[2,m],ChildData[3,m]) #Tpr
         ContactData[3,m]=((flrfunc(np.linalg.norm(ParentVelocities[0, :, m] - ParentVelocities[1, :, m]),2*rfrag,2*rfrag))**(1/3))*rfrag #largest surving
@@ -102,45 +92,40 @@ def MonoAccretion(a1,e1,a2,e2):
         Tstartn=int((CrossData[0,m]-(ContactData[1,m]/2))/Tstep) #Find new start time
         Distributions[0,(Tendn+1):Tstartn+1]=Distributions[0,Tendn]  #Extend old distributions
         Distributions[1, (Tendn+1):Tstartn+1] = Distributions[1,Tendn]
-        Distributions[2, (Tendn + 1):Tstartn + 1] += Distributions[2, Tendn] #Include Child
+        #Distributions[2, (Tendn + 1):Tstartn + 1] += Distributions[2, Tendn] #Include Child
         Tendn = int((CrossData[0, m] + (ContactData[1, m] / 2)) / Tstep) #Find new end time
-        Distributions[2, (Tstartn+1):(Tendn + 1)] += Distributions[2, Tstartn]  # Include Child
+        #Distributions[2, (Tstartn+1):(Tendn + 1)] += Distributions[2, Tstartn]  # Include Child
         #PR Drag eff
-        topTPRn=int((ContactData[2,m]*ContactData[3,m])/Tstep) #find legnth of dist
+        topTPRn=int((ContactData[2,m]*ContactData[3,m])/Tstep) #find legnth of PRdist
 
         bottomTPRn=int((ContactData[2,m]*rmincol)/Tstep)
         PRAccrete=np.zeros((topTPRn-bottomTPRn))
-        oldK=(rfrag**3.)/(2*(np.sqrt(ContactData[3,m]-rmincol)))
-        '''
-        print('Tpr', ContactData[2, m])
-        print('Time Col', CrossData[0, m])
-        print('Longest Tpr',topTPRn*Tstep)
-        print('Fastest Tpr', bottomTPRn * Tstep)
-        '''
+        #oldK=(rfrag**3.)/(2*(np.sqrt(ContactData[3,m]-rmincol)))
+
+
         K=0
         for t in range(0,topTPRn-bottomTPRn):
             PRAccrete[t]=(t+bottomTPRn)**(-1/2)
             K+=PRAccrete[t]
         PRAccrete=   (1/K)*PRAccrete
         #PRAccrete=PRAccrete*K*(ContactData[2,m]**(-1/2))*(Tstep**2.)   #Check Tstep!
+        if topTPRn-bottomTPRn==0:
+            print('Single PR drop')
+        if Tendn>Tnumber:
+            print('Contact on End')
+            Tendn=Tnumber
 
-        
+        print('PR Range',topTPRn-bottomTPRn)
         #Collision Effects
         for t in range(Tstartn + 1, Tendn + 1):
-            (n1, n2, c, dc) = monoanalytic(Distributions[0, Tstartn - 1], Distributions[1, Tstartn - 1],
-                                           ContactData[0, m], (t-Tstartn) * Tstep)
-            Distributions[0, t] = n1  # number in parent 1
-            Distributions[1, t] = n2  # numer in parent 2
-            Distributions[2, t] += c  # number in child need to fix!
-            Distributions[3, t] = dc * Tstep  # ChildMassRate from collisoins
+            Collided=(ContactData[0, m]* Distributions[0, t-1]*Distributions[1, t-1])*Tstep
+            Distributions[0, t] = Distributions[0, t-1]-Collided# number in parent 1
+            Distributions[1, t] = Distributions[1, t-1]-Collided  # numer in parent 2
+            Distributions[3, t] = 2*Collided  # ChildMassRate from collisoins
+
 
         # Effect of PR
-
-
-
         if (Tstartn+bottomTPRn+1)<Tnumber: #First Check PR will effect in time, remove weird errors
-
-
 
             if Tnumber > Tendn+topTPRn: #No Problem,  alwaysPR fits
                 print('Fits')
@@ -152,14 +137,14 @@ def MonoAccretion(a1,e1,a2,e2):
             else: #PR accretion is longer than given time
 
                 if Tnumber>Tstartn+topTPRn: #Some Fit some don't
-                    #print('Some Fit')
-                    #print('Range:',Tstartn + 1,Tnumber-topTPRn+1, 'Covering:', Tnumber-topTPRn - Tstartn)
+                    print('Some Fit')
+                    print('Range:',Tstartn + 1,Tnumber-topTPRn+1, 'Covering:', Tnumber-topTPRn - Tstartn)
                     for t in range(Tstartn + 1, Tnumber-topTPRn+1): #Fits
                         Distributions[2, (t + bottomTPRn):(t + topTPRn)] -= PRAccrete * Distributions[3, t]
                         Distributions[5, (t + bottomTPRn):(t + topTPRn)] += PRAccrete * Distributions[3, t]
 
-                    #print('second half range',Tnumber-Tendn,'Tend',Tendn)
-                    for t in range(Tnumber-Tendn, Tendn ): #Needs to be sliced
+                    print('second half range',Tnumber-topTPRn+1,Tendn,'Covering:', Tendn+topTPRn -Tnumber )
+                    for t in range(Tnumber-topTPRn+1, Tendn+1 ): #Needs to be sliced
                         # Effect of PR
                         #print('Second half')
                         #print(t)
@@ -167,9 +152,9 @@ def MonoAccretion(a1,e1,a2,e2):
                         Distributions[2, (t + bottomTPRn):] -= PRAccrete[0:(Tnumber-(t+bottomTPRn))] * Distributions[3, t]  # CHANGE
                         Distributions[5, (t + bottomTPRn):] += PRAccrete[0:(Tnumber-(t+bottomTPRn))] * Distributions[3, t]
                 else: #None Fit
-                    #print('None Fit')
-                    #print('Range:', Tendn - Tstartn)
-                    for t in range(Tstartn + 1, min(Tendn,Tnumber-bottomTPRn)):  # Needs to be sliced
+                    print('None Fit')
+                    print('Range:', Tendn - Tstartn)
+                    for t in range(Tstartn + 1, min(Tendn,Tnumber-bottomTPRn)):
                         # Effect of PR
                         Distributions[2, (t + bottomTPRn):] -= PRAccrete[:(Tnumber - (t + bottomTPRn))] * Distributions[
                             3, t]  # CHANGE
@@ -177,14 +162,16 @@ def MonoAccretion(a1,e1,a2,e2):
                             3, t]
         else: #If no PR material arrives
             print('no PR in time')
-    Distributions[0, (Tendn + 1):] = Distributions[0, Tendn]  # Extend old distributions
-    Distributions[1, (Tendn + 1):] = Distributions[1, Tendn]
-    Distributions[2, (Tendn + 1):] += Distributions[2, Tendn]  # Include Child
+    if Tnumber>Tendn+1:
+        Distributions[0, (Tendn + 1):] = Distributions[0, Tendn]  # Extend old distributions
+        Distributions[1, (Tendn + 1):] = Distributions[1, Tendn]
+
 
     #Sum to Find Star Total
     Distributions[4, 0]=Distributions[5, 0] * Tstep
     for t in range(1, Tnumber):
         Distributions[4,t]=(Distributions[5,t]*Tstep)+ Distributions[4,t-1]
+        Distributions[2, t] += Distributions[3, t] + Distributions[2, t - 1]
 
     Distributions=Distributions*((4*pi)/3)*density
 
@@ -224,40 +211,47 @@ def MonoAccretionGraphs():
     print('Plotting...')
     T=np.arange(0,Tmax,TstepLarge)
     TnumberLarge=int(Tmax/TstepLarge)
-    TotalVol=np.zeros((TnumberLarge))
-    for t in range(0,TnumberLarge):
-        TotalVol[t]=ShrinkDist[0,t]+ShrinkDist[1,t]+ShrinkDist[2,t]#+ShrinkDist[4,t]
 
     plt.figure()
-    plt.title('Mass in Parent Rings kg')
+    plt.title('Mass in Parent Rings kg '+ID)
     plt.plot(T,ShrinkDist[0,:], label='P1')
     plt.plot(T, ShrinkDist[1, :], label='P2')
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.figure()
-    plt.title('Mass in Child kg')
-    plt.plot(T, ShrinkDist[2, :], label='Child')
+    plt.title('Mass in Child kg'+ID)
+    plt.semilogy(T, ShrinkDist[2, :], label='Child')
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.figure()
-    plt.title('Mass Accrete into Child From Collisions,g/s avaraged over 100yr periods')
+    plt.title('Mass Accrete into Child From Collisions,g/s avaraged over 100yr periods'+ID)
     plt.semilogy(T, ShrinkDist[3, :]*(1000/(TstepLarge*year)), label='dChild')
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.ylabel('grams a second')
     plt.figure()
-    plt.title('PR driven Accretion onto Star, g/s avaraged over 100yr periods')
+    plt.title('PR driven Accretion onto Star, g/s avaraged over 100yr periods'+ID)
     plt.semilogy(T, ShrinkDist[5, :]*(1000/(TstepLarge*year)), label='Star Accretion Rate')
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.ylabel('grams a second')
     plt.figure()
-    plt.plot(T, ShrinkDist[4, :], label='TotalMass on Star')
+    plt.plot(T, ShrinkDist[4, :], label='TotalMass on Star'+ID)
     plt.ylabel('MAss')
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.figure()
-    plt.plot(T, TotalVol, label='Total Vol')
+    plt.plot(T, ShrinkDist[0, :]+ShrinkDist[1,:]-ShrinkDist[2,:], label='Parents-Child Mass' + ID)
+    plt.ylabel('MAss Kg')
+    plt.legend()
+    plt.xlabel('Time, yrs')
+
+    TotalMass=np.zeros((TnumberLarge))
+    for t in range(0,TnumberLarge):
+        TotalMass[t]=ShrinkDist[0,t]+ShrinkDist[1,t]+ShrinkDist[2,t]+ShrinkDist[4,t]
+
+    plt.figure()
+    plt.plot(T, TotalMass/TotalSystemMass, label='Total Mass/ Initial Total Mass'+ID)
     plt.legend()
     plt.xlabel('Time, yrs')
 

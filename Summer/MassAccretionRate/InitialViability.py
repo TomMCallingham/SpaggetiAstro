@@ -5,9 +5,15 @@ def MonoGraphs(): #Plots initial rates for fragment and parent vols
     #Target Rates in gs per s
     N=100
     Mdot=np.zeros((6))
+    rsource1 = 3
+    rsource2 = 3.1
+    pmod = 0.9
+    (a1, e1) = orbitalvalues(rsource1)
+    (a2, e2) = orbitalvaluesmod(rsource2, pmod)
 
 
-    Kappa=lambdatimeaverage(1e4)*(6/pi)*density*1e3  #changed to grams!
+    Kappa=lambdatimeaverage(a1,e1,a2,e2,int(1e4))*(6/pi)*density*1e3  #changed to grams!
+    ''''
     V=np.linspace(12,18,N)
     V=np.power(10,V)
     r=np.zeros((6,N))
@@ -22,14 +28,34 @@ def MonoGraphs(): #Plots initial rates for fragment and parent vols
 
     plt.ylabel('frag radius, m')
     plt.xlabel('Parent Volumes, m^3')
-    plt.title('Initial Mass Collision Accretion Rates, mono Dist')
+    plt.title(' rs1=%s au, rs2=%s au with pmod=%s'%(rsource1,rsource2,pmod))
     #plt.ylim([10**-2,10**2])
     plt.legend()
+    '''
+
+    Rast = np.linspace(3, 6, N)
+    Rast = np.power(10, Rast)
+    r = np.zeros((6, N))
+    plt.figure()
+    for i in range(0, 6):
+        Mdot[i] = 10 ** (i + 6)
+        for j in range(0, N):
+            r[i, j] = (Kappa * (Rast[j] ** 6.)*(((4/3)*pi))**2.) / (Mdot[i] * year)
+
+        plt.loglog(Rast, r[i, :], label='Mdot=10^%s' % (i + 6))
+
+    plt.ylabel('frag radius, m')
+    plt.xlabel('Rast, m')
+    plt.title(' rs1=%s au with p1=%s au, rs2=%s au with p2=%s au' % (rsource1,0.01, rsource2, 0.009))#pmod*0.01))
+    # plt.ylim([10**-2,10**2])
+    plt.legend()
+
+
     return
 
 
 I=1* ((2 * pi) / 360)
-Rbeam=1000
+Rbeam=100e3
 
 def TPrecess(a,e):
     #print(a/au,e)
@@ -82,7 +108,7 @@ def RcolwoATcontactParam(a1,e1,wp1,s1,a2,e2,wp2,s2,x):
 
 
 
-        RColwoA=(16 / (3 * pi)) * (1 / (T1 * T2)) * ((vrelpar )/ (sinval*v1 * v2 ))*(year/Rbeam)  #
+        RColwoA=(16 / (3 * pi)) * (1 / (T1 * T2)) * ((vrelpar )/ (sinval*v1 * v2 ))*(year/Rbeam)*0.46  #
 
         Tcontact=abs((4*Rbeam*np.linalg.norm(np.cross(V1, V2)))/(((R** 2.) * td1 * td2 * sin(I))*((wp1) * (rd1 / td1)) - (wp2) * (rd2 / td2)))
 
@@ -112,8 +138,8 @@ def lambdatimeaverage(a1,e1,a2,e2,N):
     return LambAv
 
 def paramterlamdagraph():
-    N = 100
-    rsource = np.linspace(3, 15, N)
+    N = 200
+    rsource = np.linspace(2, 15, N)
     Orbits1 = np.zeros((2,N))
     Orbits2 = np.zeros((2, N))
     for i in range(0,N):
@@ -136,22 +162,64 @@ def paramterlamdagraph():
     print('LambavFound')
     plt.figure()
 
-    plt.title('Lambav')
+    plt.title('log10(xi)')
     cp = plt.contour(rsource, rsource, LambData)#, np.arange(0, 1.2, 0.2))  # , colors='k')
     plt.clabel(cp, inline=1, fontsize=10)
     plt.xlabel('rsource au, pmod0.9')
     plt.ylabel('rsource au')
 
     plt.figure()
-    plt.title('Thalf, years')
+    plt.title('log10(Thalf/years) ')
     cp = plt.contour(rsource, rsource, Thalf)  # , np.arange(0, 1.2, 0.2))  # , colors='k')
     plt.clabel(cp, inline=1, fontsize=10)
     plt.xlabel('rsource au, pmod0.9')
     plt.ylabel('rsource au')
     return
 
-paramterlamdagraph()
-#MonoGraphs()
+
+def MonoLambavRastGraphs():
+    N=1000
+    ttop=11
+    tmin=5
+    rfrag=1
+    tlegnth=ttop-tmin
+    iMdot = np.zeros((tlegnth))  # g/s
+    lambdav=np.zeros((tlegnth,N))
+
+    Rast=np.linspace(4,7,N)
+    plt.figure()
+    for i in range(0, N):
+        Rast[i]=10**Rast[i]
+    for t in range(0,ttop-tmin):
+        iMdot[t]=10**(t+tmin)
+        for i in range(0,N):
+            lambdav[t,i]=(9/(64*(pi**2.)*density))*(rfrag/(Rast[i]**6.))*iMdot[t]*(year/1000)
+
+        plt.loglog(Rast,lambdav[t,:],label='Mdot=10^%s g/s'%(t+tmin))
+    plt.legend()
+    plt.xlabel('Rast, m')
+    plt.ylabel('xi')
+
+    lambdav=np.linspace(20,23,N)
+    Rast=np.zeros((tlegnth,N))
+    plt.figure()
+    for i in range(0, N):
+        lambdav[i] = 10 ** (-lambdav[i])
+    for t in range(0, ttop - tmin):
+        iMdot[t] = 10 ** (t + tmin)
+        for i in range(0, N):
+            Rast[t, i] = ((9 / (64 * (pi ** 2.) * density)) * (rfrag / (lambdav[i] )) * iMdot[t] * (year / 1000))**(1/6)
+
+        plt.loglog(Rast[t, :], lambdav, label='Mdot=10^%s g/s' % (t + tmin))
+    plt.legend()
+    plt.xlabel('Rast, m')
+    plt.ylabel('xi')
+    plt.title('Graph of Mdot dependancies on Rast and xi')
+
+    return
+#paramterlamdagraph()
+#MonoLambavRastGraphs()
+MonoGraphs()
 plt.show()
 
 

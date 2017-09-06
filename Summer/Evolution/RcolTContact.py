@@ -5,9 +5,9 @@ G = 6.67408e-11
 Mstar = 1.2e30
 '''
 
-(a1,e1)=orbitalvalues(3)
-(a2,e2)=orbitalvalues(10)
-a1=0.999*a1
+#(a1,e1)=orbitalvalues(3)
+#(a2,e2)=orbitalvalues(10)
+#a1=0.999*a1
 
 #Values
 '''
@@ -17,19 +17,20 @@ a2 = 2.4 * au
 e2 = 0.997
 '''
 
-I=1* ((2 * pi) / 360)
-Rbeam=100e3  #CHANGED
+#I=1* ((2 * pi) / 360)
+#Rbeam=100e3
 
 def TPrecess(a,e):
     Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5)*(10**6.) #in Yrs
     wp = (2 * np.pi) / Tp
     return (Tp,wp)
 
-(Tp1,wp1)=TPrecess(a1,e1)
-(Tp2,wp2)=TPrecess(a2,e2)
 
 
-def RcolwoATcontact(a1,e1,a2,e2,s1,s2,x):
+
+def RcolwoATcontact(a1,e1,a2,e2,s1,s2,x,I1,I2,Rbeam):
+    (Tp1, wp1) = TPrecess(a1, e1)
+    (Tp2, wp2) = TPrecess(a2, e2)
     CollisionData=CollisionPoints(a1,e1,s1,a2,e2,s2)
     if x == 'a':
         R = CollisionData[1, 0]
@@ -47,11 +48,11 @@ def RcolwoATcontact(a1,e1,a2,e2,s1,s2,x):
     else:
         td1=thetadot(a1,e1,C-s1)
         rd1=rdot(a1,e1,C-s1)
-        V1=np.array([rd1,R*td1*cos(I),R*td1*sin(I)])
+        V1=np.array([rd1,R*td1*cos(I1),R*td1*sin(I1)])
         v1=np.sqrt((rd1**2.)+((R*td1)**2.))
         td2 = thetadot(a2, e2, C - s2)
         rd2 = rdot(a2, e2, C - s2)
-        V2 = np.array([rd2, R * td2 * cos(I), R * td2 * sin(I)])
+        V2 = np.array([rd2, R * td2 * cos(I2), R * td2 * sin(I2)])
         v2 = np.sqrt((rd2 ** 2.) + ((R * td2) ** 2.))
         Vrelpar=V1-V2
         vrelpar=npal.norm(Vrelpar)
@@ -73,7 +74,7 @@ def RcolwoATcontact(a1,e1,a2,e2,s1,s2,x):
 
         RColwoA=(16 / (3 * pi)) * (1 / (T1 * T2)) * ((vrelpar )/ (sinval*v1 * v2 ))*(year/Rbeam)  #
 
-        Tcontact=abs((4*Rbeam*np.linalg.norm(np.cross(V1, V2)))/(((R** 2.) * td1 * td2 * sin(I))*((wp1) * (rd1 / td1)) - (wp2) * (rd2 / td2)))
+        Tcontact=abs((4*Rbeam*np.linalg.norm(np.cross(V1, V2)))/(((R** 2.) * td1 * td2 * abs(sin(I2-I1)))*((wp1) * (rd1 / td1)) - (wp2) * (rd2 / td2)))
 
 
     return [RColwoA,Tcontact]

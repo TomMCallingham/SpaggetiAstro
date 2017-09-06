@@ -5,8 +5,8 @@ Mstar = 1.2e30
 au = 1.496e11
 year = 3.154e+7
 #Setup
-rsource1=3.1
-rsource2=3
+rsource1=3
+rsource2=10
 pmod=0.9
 s1i=1
 s2i=0
@@ -16,7 +16,7 @@ s2i=0
 Tmax=40*(10**6.)
 tinterval = 1
 
-CrossDataname='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/CrossData%s_%s_%s_%sMyr.npy' %(rsource1,rsource2,pmod,int(Tmax*(1e-6)))
+CrossDataname='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/CrossData_rs%s_rs%s_pm%s_%sMyr.npy' %(rsource1,rsource2,pmod,int(Tmax*(1e-6)))
 '''
 #x='a'
 a1=2.5*au
@@ -37,7 +37,7 @@ else:
     print('Rings dont cross twice')
 
 def TPrecess(a,e):
-    Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5) #in MYrs
+    Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5)*1e6 #in Yrs
     wp = (2 * np.pi) / Tp
     return (Tp,wp)
 
@@ -49,10 +49,11 @@ def TPrecess(a,e):
 
 
 def intersectgraphs():
-
-    T=np.arange(0,20,10**-4.)*(1e-6) #megayears
+    T = np.arange(0, Tmax, 1000*tinterval)
     (Tp1, wp1) = TPrecess(a1, e1)
     (Tp2, wp2) = TPrecess(a2, e2)
+    Tp1=Tp1*(10**-6) #convert to mega years
+    Tp2 = Tp2 * (10 ** -6)
 
     R1plus=npr(a1,e1,(pi/2)-(s1i+wp1*T)) #changed to a minus
     R1minus = npr(a1, e1, -(pi / 2) -(s1i + wp1 * T))
@@ -233,7 +234,7 @@ def lambdapattern():
 
 #intersectgraphs()
 #intersectfinder()
-saveintersects()
+#saveintersects()
 #CrossData=np.load(CrossDataname)
 #print('no of contact:',np.size(CrossData[0,:]))
 ##print(np.transpose(CrossData))

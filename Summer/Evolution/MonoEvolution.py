@@ -6,11 +6,11 @@ from numba import jit, int32,float64
 
 #Parent Orbits
 I1=0
-i2=1  #inlcination in degrees
+i2=10  #inlcination in degrees
 I2=(i2/360)*(2*pi)
 rsource1=3
 rsource2=10
-pmod=0.9
+pmod=0.01
 s1i=1
 s2i=0
 (a1,e1)=orbitalvalues(rsource1)
@@ -31,7 +31,7 @@ Tmax=4e7
 Tstep=1
 TstepLarge=100
 
-ADD=''#''HalfAst'
+ADD=''#''HalfAst' 'TimeStepLarge'
 
 DataFolder='C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/DataFiles/'
 ID='(%s_%s_%s_i%s_rb%s_%sMyr)'%(rsource1,rsource2,pmod,i2,int(Rbeam/1000),(Tmax*(1e-6)))
@@ -99,8 +99,9 @@ def MonoAccretion(a1,e1,a2,e2):
         topTPRn=int((ContactData[2,m]*ContactData[3,m])/Tstep) #find legnth of PRdist
 
         bottomTPRn=int((ContactData[2,m]*rmincol)/Tstep)
+        if topTPRn - bottomTPRn == 0:
+            print('Single PR drop')
         PRAccrete=np.zeros((topTPRn-bottomTPRn))
-        #oldK=(rfrag**3.)/(2*(np.sqrt(ContactData[3,m]-rmincol)))
 
 
         K=0
@@ -108,12 +109,11 @@ def MonoAccretion(a1,e1,a2,e2):
             PRAccrete[t]=(t+bottomTPRn)**(-1/2)
             K+=PRAccrete[t]
         PRAccrete=   (1/K)*PRAccrete
-        #PRAccrete=PRAccrete*K*(ContactData[2,m]**(-1/2))*(Tstep**2.)   #Check Tstep!
-        if topTPRn-bottomTPRn==0:
-            print('Single PR drop')
-        if Tendn>Tnumber:
-            print('Contact on End')
-            Tendn=Tnumber
+        if Tendn>Tnumber: #If in contact as it goes over Tmax
+            print('Contact over End')
+            #Tendn=Tnumber-1
+            #PRAccrete=np.delete(PRAccrete,np.arange(Tendn,topTPRn - bottomTPRn))
+
 
         print('PR Range',topTPRn-bottomTPRn)
         #Collision Effects
@@ -122,6 +122,9 @@ def MonoAccretion(a1,e1,a2,e2):
             Distributions[0, t] = Distributions[0, t-1]-Collided# number in parent 1
             Distributions[1, t] = Distributions[1, t-1]-Collided  # numer in parent 2
             Distributions[3, t] = 2*Collided  # ChildMassRate from collisoins
+
+
+
 
 
         # Effect of PR
@@ -144,7 +147,7 @@ def MonoAccretion(a1,e1,a2,e2):
                         Distributions[5, (t + bottomTPRn):(t + topTPRn)] += PRAccrete * Distributions[3, t]
 
                     print('second half range',Tnumber-topTPRn+1,Tendn,'Covering:', Tendn+topTPRn -Tnumber )
-                    for t in range(Tnumber-topTPRn+1, Tendn+1 ): #Needs to be sliced
+                    for t in range(Tnumber-topTPRn+1, min(Tendn+1,Tnumber) ): #Needs to be sliced
                         # Effect of PR
                         #print('Second half')
                         #print(t)
@@ -241,7 +244,7 @@ def MonoAccretionGraphs():
     plt.legend()
     plt.xlabel('Time, yrs')
     plt.figure()
-    plt.plot(T, ShrinkDist[0, :]+ShrinkDist[1,:]-ShrinkDist[2,:], label='Parents-Child Mass' + ID)
+    plt.plot(T, (ShrinkDist[0, :]+ShrinkDist[1,:]-ShrinkDist[2,:])/(ShrinkDist[0, :]+ShrinkDist[1,:]+ShrinkDist[2,:]), label='Parents-Child Mass' + ID)
     plt.ylabel('MAss Kg')
     plt.legend()
     plt.xlabel('Time, yrs')
@@ -260,3 +263,19 @@ SaveMonoAccretionDist()
 ShrinkMonoAccretionDist()
 MonoAccretionGraphs()
 plt.show()
+
+'''Current Error:
+Contact over End
+PR Range 12603
+Some Fit
+Range: 39955310 39987359 Covering: 32049
+second half range 39987359 39999999 Covering: 12641
+Traceback (most recent call last):
+  File "C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/Evolution/MonoEvolution.py", line 259, in <module>
+    SaveMonoAccretionDist()
+  File "C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/Evolution/MonoEvolution.py", line 184, in SaveMonoAccretionDist
+    MonoAccretionDist = MonoAccretion(a1,e1,a2,e2)
+  File "C:/Users/Tom/Documents/PycharmProjects/SpaggetiAstro/Summer/Evolution/MonoEvolution.py", line 152, in MonoAccretion
+    Distributions[2, (t + bottomTPRn):] -= PRAccrete[0:(Tnumber-(t+bottomTPRn))] * Distributions[3, t]  # CHANGE
+ValueError: operands could not be broadcast together with shapes (0,) (12602,) (0,)'''
+#From covering the end!

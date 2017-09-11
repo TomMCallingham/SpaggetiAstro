@@ -10,13 +10,24 @@ a=0.3
 b=1.5
 rsource1=10
 rsource2=10
-pmod=0.9
+pmod=0.01
 (a1,e1)=orbitalvalues(rsource1)
 (a2,e2)=orbitalvaluesmod(rsource2,pmod)
+p1=(1-e1)*a1
+p2=(1-e2)*a2
+q1=(1+e1)*a1
+q2=(1+e2)*a2
+if (p2-p1)*(q1-q2)>0:
+    print('Rings Cross Twice Checked')
+else:
+    print('Rings dont cross twice')
 #a1=0.999*a1
 I2=1* ((2 * pi) / 360)
 I1=0
 Rbeam=100*1e3
+
+rfrag=1
+rmincol=1e-6
 
 def TPrecess(a,e):
     Tp=0.15*((1-(e**2.))/(1-(0.999**2.)))*((a/au)**2.5)*(10**6.) #in Yrs
@@ -25,9 +36,11 @@ def TPrecess(a,e):
 
 (Tp1,wp1)=TPrecess(a1,e1)
 (Tp2,wp2)=TPrecess(a2,e2)
+print('wp1=',wp1)
+print('wp2=',wp2)
 
 
-def TimeGraphs(rfrag, N):
+def TimeGraphs( N):
     # N = 1000  # Choosing resolution badd word ah well
     L = np.linspace(0, 2 * pi, N)  # NOTE CHECK L def!! + or - #s1-s2
     R = np.zeros((2, N))  # radial collision points
@@ -71,28 +84,54 @@ def TimeGraphs(rfrag, N):
                                                 newe(Vdata[x, 0, i], Vdata[x, 1, i] / R[x, i], R[x, i]),
                                                 np.arccos(Vmid[x, 1, i] / Vdata[x, 1, i])])
     print('Finding Times...')
-    Tpr = np.zeros((2, N))
+    MaxTpr = np.zeros((2, N))
+    MinTpr = np.zeros((2, N))
     Tcontact= np.zeros((2, N))
+
+    Rcol= np.zeros((2, N))
+
     for i in range(1, N - 1):
         for x in (0, 1):
-            Tpr[x,i] = TPrAnalytic(OrbitdataVdata[x, 0, i], OrbitdataVdata[x, 1, i]) * dflr[x, i]
-            Tcontact[x,i]=RcolwoATcontact(a1,e1,a2,e2,0,L[i],AB[x],I1,I2,Rbeam)[1]
+            MinTpr[x,i] = TPrAnalytic(OrbitdataVdata[x, 0, i], OrbitdataVdata[x, 1, i])  #Min
 
+            MaxTpr[x,i] = MinTpr[x,i] * dflr[x, i]*rfrag  #Max
+            [Rcol[x,i],Tcontact[x,i]]=RcolwoATcontact(a1,e1,a2,e2,0,L[i],AB[x],I1,I2,Rbeam)
+
+
+    MinTpr=MinTpr*rmincol
     Tsep = min(Tp1,Tp2)/4
 
     for x in (0, 1):
+        '''
         plt.figure()
         plt.title('Times at %s pts, rsource1=%s au, rsource2=%s au with pmod=%s'%(AB[x],rsource1,rsource2,pmod))
-        plt.semilogy(L[1:N-1]/pi,Tpr[x,1:N-1],label='PR Time')
+        plt.semilogy(L[1:N-1]/pi,MaxTpr[x,1:N-1],label='Max PR Time')
+        plt.semilogy(L[1:N - 1] / pi, MinTpr[x, 1:N - 1], label='Min PR Time')
         plt.semilogy(L[1:N - 1]/pi, Tcontact[x, 1:N - 1], label='Contact time')
         plt.semilogy(np.array([0,2]), np.array([Tsep,Tsep]), label='Seperation Time')
         plt.ylabel('Times, yrs')
         plt.xlabel('Lambda')
         plt.legend()
+        '''
+
+
+
+        plt.ylabel('Times, yrs')
+        plt.xlabel('Lambda')
+        plt.legend()
+        '''
+        plt.figure()
+        plt.title('Rcol at %s pts, rsource1=%s au, rsource2=%s au with pmod=%s' % (AB[x], rsource1, rsource2, pmod))
+        plt.semilogy(L[1:N - 1] / pi, Rcol[x, 1:N - 1], label='Collision Rate')
+        plt.ylabel('Rcol')
+        plt.xlabel('Lambda')
+        plt.legend()
+        '''
 
 
     print('Times Found')
 
+    '''
     # vrel plot
     plt.figure()
     plt.semilogy(L[1:N - 1], vrelpar[0, 1:N - 1], label='Vrel at a')
@@ -102,21 +141,13 @@ def TimeGraphs(rfrag, N):
     plt.semilogy(L[1:N - 1], dflr[0, 1:N - 1], label='Reduction in Fragments')
     plt.semilogy(L[1:N - 1], dflr[1, 1:N - 1], label='Reduction in Fragments')
     plt.legend()
+    '''
 
 
 
     return
 
 
-TimeGraphs(1, 1000)
+TimeGraphs( 10000)
 plt.show()
 
-'''
-colrad=0.2*au
-rd=152949
-trd=2228218
-a=newa(rd,trd/colrad,colrad)
-e=newe(rd,trd/colrad,colrad)
-print('newa /au',a/au)
-print('newe',e)
-'''

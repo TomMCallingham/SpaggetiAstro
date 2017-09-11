@@ -178,7 +178,7 @@ def paramterlamdagraph():
 
 
 def MonoLambavRastGraphs():
-    N=1000
+    N=100
     ttop=11
     tmin=5
     rfrag=1
@@ -217,9 +217,9 @@ def MonoLambavRastGraphs():
     plt.title('Graph of Mdot dependancies on Rast and xi')
 
     return
-#paramterlamdagraph()
+paramterlamdagraph()
 #MonoLambavRastGraphs()
-MonoGraphs()
+#MonoGraphs()
 plt.show()
 
 
